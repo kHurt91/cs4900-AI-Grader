@@ -1,0 +1,108 @@
+import type { Course, CourseItem } from "../types";
+import CourseTypePill from "../elements/CourseType";
+
+type Props= {
+  selectedCourse: Course;
+  items: CourseItem[];
+  onOpenGrades: () => void;
+  onBack: () => void;
+};
+
+export default function CoursePage({
+  selectedCourse,
+  items,
+  onOpenGrades,
+  onBack,
+}: Props) {
+  return (
+    <div className="rounded-2xl bg-white border shadow-sm overflow-hidden">
+      <div className="h-2 bg-[#FFC72C]" />
+
+      <div className="p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="text-sm text-gray-600">
+            {selectedCourse.term} • Instructor: {selectedCourse.instructor_name}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenGrades}
+              className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
+            >
+              Grades
+            </button>
+
+            <button
+              type="button"
+              onClick={onBack}
+              className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
+            >
+              Back to courses
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-2xl border overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-12 bg-gray-50 text-xs font-bold text-gray-600">
+            <div className="md:col-span-7 p-3 border-b md:border-b-0 md:border-r">
+              Item
+            </div>
+            <div className="md:col-span-3 p-3 border-b md:border-b-0 md:border-r">
+              Completion
+            </div>
+            <div className="md:col-span-2 p-3">Score</div>
+          </div>
+
+          <div className="divide-y">
+            {items.length === 0 ? (
+              <div className="p-4 text-sm text-gray-600">
+                No assignments or quizzes yet.
+              </div>
+            ) : (
+              items.map((it) => (
+                <button
+                  key={it.id}
+                  type="button"
+                  onClick={() => alert(`Open: ${it.title}`)}
+                  className="w-full text-left hover:bg-gray-50 transition"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-12">
+                    <div className="md:col-span-7 p-4 md:border-r">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="font-bold text-[#4E3629]">
+                          {it.title}
+                        </div>
+                        <div className="shrink-0">
+                          <CourseTypePill type={it.type} />
+                        </div>
+                      </div>
+
+                      <div className="text-sm text-gray-600 mt-1">
+                        {it.dueText}
+                      </div>
+
+                      {it.windowText ? (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {it.windowText}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="md:col-span-3 p-4 md:border-r text-sm text-gray-700">
+                      {it.submissionsText ?? "-"}
+                    </div>
+
+                    <div className="md:col-span-2 p-4 text-sm text-gray-700">
+                      {it.scoreText ?? "-"}
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
