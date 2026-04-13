@@ -318,11 +318,35 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
       if (index !== -1) {
 
         if (index > lastIndex) {
-          parts.push(
-            <span key={`text-${lastIndex}`}>
-              {text.substring(lastIndex, index)}
-            </span>
-          );
+          const textChunk = text.substring(lastIndex, index);
+          
+          // Check for image placeholders
+          const imageMatch = textChunk.match(/\[IMAGE:([^\]]+)\]/);
+          if (imageMatch) {
+            const imageName = imageMatch[1];
+            const beforeImage = textChunk.substring(0, imageMatch.index);
+            const afterImage = textChunk.substring(imageMatch.index! + imageMatch[0].length);
+            
+            parts.push(
+              <span key={`text-${lastIndex}`}>
+                {beforeImage}
+                <div className="my-4 flex justify-center">
+                  <img 
+                    src={`http://127.0.0.1:8000/static/images/${imageName}.png`}
+                    alt={imageName}
+                    className="max-w-full h-auto border rounded"
+                  />
+                </div>
+                {afterImage}
+              </span>
+            );
+          } else {
+            parts.push(
+              <span key={`text-${lastIndex}`}>
+                {textChunk}
+              </span>
+            );
+          }
         }
         
 

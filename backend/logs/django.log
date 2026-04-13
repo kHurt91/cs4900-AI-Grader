@@ -1184,3 +1184,48 @@ WARNING 2026-04-10 22:53:21,194 log Bad Request: /api/quizzes/16/start_attempt/
 INFO 2026-04-10 23:07:39,373 autoreload Watching for file changes with StatReloader
 WARNING 2026-04-10 23:09:11,387 log Bad Request: /api/quizzes/6/start_attempt/
 WARNING 2026-04-10 23:41:35,541 log Bad Request: /api/quizzes/6/start_attempt/
+WARNING 2026-04-12 15:13:25,078 log Bad Request: /api/quizzes/6/start_attempt/
+INFO 2026-04-12 15:29:26,639 autoreload /home/ubuntu/phase2-work/cs4900-AI-Grader/backend/apps/quizzes/views.py changed, reloading.
+INFO 2026-04-12 15:29:31,678 autoreload Watching for file changes with StatReloader
+INFO 2026-04-12 15:31:59,475 autoreload /home/ubuntu/phase2-work/cs4900-AI-Grader/backend/apps/quizzes/views.py changed, reloading.
+INFO 2026-04-12 15:31:59,994 autoreload Watching for file changes with StatReloader
+INFO 2026-04-12 15:37:05,045 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-12 15:58:58,192 log Bad Request: /api/quizzes/17/start_attempt/
+INFO 2026-04-12 16:02:29,088 autoreload Watching for file changes with StatReloader
+INFO 2026-04-12 17:42:33,427 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-12 17:42:53,245 log Bad Request: /api/quizzes/18/start_attempt/
+WARNING 2026-04-12 17:43:06,407 log Bad Request: /api/quizzes/18/start_attempt/
+INFO 2026-04-12 17:43:58,829 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-12 17:44:33,599 log Bad Request: /api/quizzes/18/start_attempt/
+WARNING 2026-04-12 17:44:59,513 log Bad Request: /api/quizzes/16/start_attempt/
+WARNING 2026-04-12 17:45:12,131 log Bad Request: /api/quizzes/18/start_attempt/
+WARNING 2026-04-12 17:46:52,382 log Bad Request: /api/quizzes/6/start_attempt/
+WARNING 2026-04-12 17:49:05,854 log Bad Request: /api/quizzes/18/start_attempt/
+WARNING 2026-04-12 17:49:47,647 log Bad Request: /api/users/auth/register/
+WARNING 2026-04-12 17:50:33,891 log Bad Request: /api/quizzes/18/start_attempt/
+INFO 2026-04-12 18:15:06,080 autoreload /home/ubuntu/phase2-work/cs4900-AI-Grader/backend/apps/quizzes/views.py changed, reloading.
+INFO 2026-04-12 18:15:08,341 autoreload Watching for file changes with StatReloader
+INFO 2026-04-12 18:15:31,189 autoreload /home/ubuntu/phase2-work/cs4900-AI-Grader/backend/apps/quizzes/views.py changed, reloading.
+INFO 2026-04-12 18:15:31,613 autoreload Watching for file changes with StatReloader
+INFO 2026-04-12 18:15:51,875 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-12 18:16:45,930 log Bad Request: /api/quizzes/18/start_attempt/
+WARNING 2026-04-12 18:17:04,639 log Bad Request: /api/quizzes/16/start_attempt/
+WARNING 2026-04-12 18:17:15,740 log Bad Request: /api/quizzes/18/start_attempt/
+INFO 2026-04-12 19:02:55,206 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-13 08:44:01,698 log Not Found: /
+WARNING 2026-04-13 08:44:01,939 log Not Found: /favicon.ico
+WARNING 2026-04-13 08:44:04,650 log Not Found: /
+WARNING 2026-04-13 08:44:31,151 log Not Found: /
+WARNING 2026-04-13 08:44:32,172 log Not Found: /
+WARNING 2026-04-13 08:44:32,466 log Not Found: /
+WARNING 2026-04-13 08:44:33,308 log Not Found: /
+INFO 2026-04-13 08:49:31,659 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-13 08:49:41,783 log Not Found: /
+INFO 2026-04-13 08:52:13,114 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-13 08:53:30,707 log Not Found: /
+WARNING 2026-04-13 09:24:22,311 log Not Found: /favicon.ico
+WARNING 2026-04-13 11:06:56,496 log Not Found: /api/quizzes/18/submit_attempt/
+WARNING 2026-04-13 11:09:32,843 log Not Found: /favicon.ico
+INFO 2026-04-13 16:44:37,250 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-13 16:45:15,851 log Bad Request: /api/quizzes/20/start_attempt/
+WARNING 2026-04-13 16:52:36,367 log Bad Request: /api/quizzes/20/start_attempt/

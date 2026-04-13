@@ -90,6 +90,15 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
       scoreText: "- / 25",
       evalText: "Up to 4 attempts",
     },
+    {
+      id: "q20",
+      type: "Quiz",
+      title: "Problem 8.6 - Antenna Far-Field Pattern",
+      dueText: "Available now",
+      submissionsText: "Not started",
+      scoreText: "- / 20",
+      evalText: "Up to 3 attempts",
+    },
   ],
 };
 
