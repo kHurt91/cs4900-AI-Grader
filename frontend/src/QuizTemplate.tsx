@@ -6,6 +6,7 @@ import React, { useState, useRef, useMemo, useEffect } from "react";
 import "katex/dist/katex.min.css";
 import katex from "katex";
 import { BlockMath } from "react-katex";
+import { InlineMath } from "react-katex";
 
 type QuizPage = "quiz" | "details" | "submit";
 
@@ -260,6 +261,19 @@ export default function Quiztemplate({ setPage, quizId = 1 }: Props) {
     }
   };
 
+// function to render the questions with latex when surrounded by $ ... $ 
+function renderTextWithLatex(text: string) {
+  const parts = text.split(/(\$.*?\$)/g); // split by $...$ 
+
+  return parts.map((part, index) => {
+    if (part.startsWith("$") && part.endsWith("$")) {
+      const math = part.slice(1, -1);
+      return <InlineMath key={index} math={math} />; // uses inline math to place it in correct spot
+    }
+    return <span key={index}>{part}</span>;
+  });
+}
+
   const isAnswered = (qid: number) => {
     return multipleAnswers[qid] || textAnswers[qid];
   };
@@ -334,7 +348,7 @@ export default function Quiztemplate({ setPage, quizId = 1 }: Props) {
               {questions.map((q, index) => (
                 <div key={q.id} id={`question-${q.id}`}>
                   <p className="font-semibold mb-2 text-lg">
-                    Question {index + 1}: {q.text}
+                    Question {index + 1}: {renderTextWithLatex(q.text)}
                   </p>
                   {q.latex && <BlockMath math={q.latex} />}
 
