@@ -8,107 +8,154 @@ from datetime import timedelta
 User = get_user_model()
 
 class Command(BaseCommand):
-    help = 'Create Problem 8.4 CORRECT - 1 question, 4 attempts allowed'
+    help = 'Create Problem 8.4 with 4 variations matching sponsor PDF'
 
     def handle(self, *args, **options):
         instructor, _ = User.objects.get_or_create(
             username='instructor',
-            defaults={'email': 'instructor@example.com', 'role': 'instructor', 
-                     'first_name': 'Test', 'last_name': 'Instructor'}
+            defaults={
+                'email': 'instructor@example.com',
+                'role': 'instructor',
+                'first_name': 'Test',
+                'last_name': 'Instructor'
+            }
         )
         if not instructor.check_password('password123'):
             instructor.set_password('password123')
             instructor.save()
 
-        course = Course.objects.get(course_code='ECE5950', semester='spring', year=2026, instructor=instructor)
+        course, _ = Course.objects.get_or_create(
+            course_code='ECE5950',
+            semester='spring',
+            year=2026,
+            instructor=instructor,
+            defaults={
+                'title': 'Telecommunications',
+                'description': 'Advanced Telecommunications Course'
+            }
+        )
 
         # Delete old quiz if exists
         old_quiz = Quiz.objects.filter(title='Problem 8.4 - Beam Pattern Derivation', course=course).first()
         if old_quiz:
             old_quiz.delete()
 
-        # Create quiz with max_attempts = 4 (SPONSOR REQUIREMENT)
+        # Create quiz - 4 attempts, 4 variations
         quiz = Quiz.objects.create(
             title='Problem 8.4 - Beam Pattern Derivation',
             course=course,
-            description='Multi-step derivation. Students can attempt 4 times.',
+            description='Multi-step derivation with randomized answer box placement and progressive hints',
             quiz_type='homework',
-            time_limit=60,
+            time_limit=45,
             available_from=timezone.now(),
             available_until=timezone.now() + timedelta(days=30),
-            max_attempts=4,  # CHANGED: 4 attempts instead of 10
+            max_attempts=4,
             show_correct_answers=True,
             is_published=True,
             created_by=instructor,
-            total_points=25.0,  # CHANGED: 25 points (5 steps × 5 points)
+            total_points=25.0,
         )
 
-        # Create ONE problem with all 5 steps (NOT 4 questions!)
-        problem = Problem.objects.create(
-            title='Beam Pattern Derivation',
-            difficulty='advanced',
-            author=instructor,
-            question_text='''Complete the derivation steps indicated below to show that
-
-Ωₚ = 4π/Dₘₐₓ
-
-where Ωₚ is the antenna beam pattern and Dₘₐₓ is the directivity.
-
-1. Write the definition for Ωₚ, in terms of Pₙ(θ,φ):
-
-[ANSWER_BOX_1]
-
-2. Express the integrand in step 1 in terms of P(R,θ,φ):
-
-[ANSWER_BOX_2]
-
-3. Express Ωₚ now in terms of U(Ω):
-
-[ANSWER_BOX_3]
-
-4. Express the integral in step 3 as two fractions as shown:
-
-(−)∫[U(Ω)/U₀]dΩ
-
-[ANSWER_BOX_4]
-
-5. Apply the directivity relationships to give the following integral form:
-
-[ANSWER_BOX_5]
-
-This integral then evaluates to give the final form desired.''',
-            solution_expression='',
-            solution_explanation='Progressive learning through multiple attempts'
-        )
-
-        # Create ONE quiz problem (not 4!)
-        qp = QuizProblem.objects.create(quiz=quiz, problem=problem, problem_order=1, points=25.0)
+        # Common derivation steps (5 steps total)
+        intro = r'Complete the derivation steps indicated below to show that Ωₚ = 4π/Dₘₐₓ, where Ωₚ is the antenna beam pattern and Dₘₐₓ is the directivity.'
         
-        # Create 5 answer boxes (one for each step)
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=1, box_label='Ωₚ = ',
-            expected_answer=r'\int P_n(\theta,\phi) \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=2, box_label='Ωₚ = ',
-            expected_answer=r'\int \frac{P(R,\theta,\phi)}{P_{\max}} \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=3, box_label='Ωₚ = ',
-            expected_answer=r'\int \frac{U(\Omega)}{U_{\max}} \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=4, box_label='Ωₚ = ',
-            expected_answer=r'\frac{U_{\max}}{U_0} \int \frac{U(\Omega)}{U_{\max}} \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=5, box_label='Ωₚ = ',
-            expected_answer=r'\frac{4\pi}{D_{\max}}', points=5.0
-        )
+        steps_text = [
+            r'1. Write the definition for Ωₚ, in terms of Pₙ(θ,φ)',
+            r'2. Express the integrand in step 1 in terms of P(R,θ,φ)',
+            r'3. Express Ωₚ now in terms of U(Ω)',
+            r'4. Express the integral in step 3 as two fractions as shown:',
+            r'5. Apply the directivity relationships to give the following integral form: This integral then evaluates to give the final form desired.',
+        ]
 
-        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.4 CORRECTED ==='))
+        # Expected answers for each step
+        step_answers = {
+            1: r'\int P_n(\theta,\phi) \, d\Omega',
+            2: r'\int \frac{P(R,\theta,\phi)}{P_{\max}} \, d\Omega',
+            3: r'\int \frac{U(\Omega)}{U_{\max}} \, d\Omega',
+            4: r'\frac{U_{\max}}{U_0} \cdot \frac{\int U(\Omega) \, d\Omega}{U_{\max}}',
+            5: r'\frac{4\pi}{D_{\max}}',
+        }
+
+        # Define 4 variations matching PDF exactly
+        variations = [
+            # Variation 1 (Page 1): Boxes at 1,3,4 - Hint for step 3
+            {
+                'box_steps': [1, 3, 4],
+                'hint_text': r'\Omega_p = \int \frac{U(\Omega)}{U_{\max}} \, d\Omega \text{ is the solution for step 3. Not all step solutions are given.}',
+            },
+            # Variation 2 (Page 2): Boxes at 1,5 - No hints
+            {
+                'box_steps': [1, 5],
+                'hint_text': None,
+            },
+            # Variation 3 (Page 3): Boxes at 3,4 - Hint for step 3
+            {
+                'box_steps': [3, 4],
+                'hint_text': r'\Omega_p = \int \frac{U(\Omega)}{U_{\max}} \, d\Omega \text{ is the solution for step 3. Not all step solutions are given.}',
+            },
+            # Variation 4 (Page 4): Boxes at 3,4 - Hint for step 4
+            {
+                'box_steps': [3, 4],
+                'hint_text': r'\Omega_p = \frac{U_{\max}}{U_0} \cdot \frac{\int U(\Omega) \, d\Omega}{U_{\max}} \text{ is the solution for step 4. Not all step solutions are given.}',
+            },
+        ]
+
+        # Create a problem for EACH variation
+        for idx, var in enumerate(variations, 1):
+            # Build question text
+            question_parts = [intro, '']
+            
+            # Add all 5 steps with answer boxes at specified positions
+            box_counter = 1
+            for step_num in range(1, 6):
+                question_parts.append(steps_text[step_num - 1])
+                question_parts.append('')
+                
+                # Add answer box if this step has one
+                if step_num in var['box_steps']:
+                    question_parts.append(f'Ωₚ = [ANSWER_BOX_{box_counter}]')
+                    question_parts.append('')
+                    box_counter += 1
+            
+            # Add hint text at the bottom if present
+            if var['hint_text']:
+                question_parts.append('')
+                question_parts.append(var['hint_text'])
+
+            problem = Problem.objects.create(
+                title=f'Beam Pattern Derivation - Variation {idx}',
+                difficulty='advanced',
+                author=instructor,
+                question_text='\n'.join(question_parts),
+                solution_expression='',
+                solution_explanation=f'Variation {idx}: Boxes at steps {var["box_steps"]}'
+            )
+
+            qp = QuizProblem.objects.create(
+                quiz=quiz,
+                problem=problem,
+                problem_order=idx,
+                points=25.0
+            )
+
+            # Create answer boxes (NO readonly hints - hints are text only)
+            box_num = 1
+            for step_num in var['box_steps']:
+                AnswerBox.objects.create(
+                    quiz_problem=qp,
+                    box_number=box_num,
+                    box_label='',  # Empty label, Ωₚ = is in the text
+                    placeholder_text='Enter your LaTeX expression',
+                    expected_answer=step_answers[step_num],
+                    answer_template='',
+                    is_readonly=False,  # All boxes are editable
+                    points=25.0 / len(var['box_steps'])
+                )
+                box_num += 1
+
+        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.4 Complete ==='))
         self.stdout.write(f'Quiz ID: {quiz.id}')
-        self.stdout.write(f'Questions: 1 (with 5 steps)')
-        self.stdout.write(f'Answer boxes: 5')
+        self.stdout.write(f'Variations: 4')
         self.stdout.write(f'Max attempts: 4')
         self.stdout.write(f'Total points: 25')
+        self.stdout.write('Random box placement with text hints at bottom')

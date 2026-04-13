@@ -92,35 +92,57 @@ class QuizViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def problems(self, request, pk=None):
-        """Get all problems for a quiz with answer boxes"""
+        """Get problems for a quiz - returns selected variation if attempt_id provided"""
         quiz = self.get_object()
+        attempt_id = request.query_params.get('attempt_id')
+        
+        if attempt_id:
+            # Get the specific variation for this attempt
+            try:
+                attempt = QuizAttempt.objects.get(attempt_id=attempt_id, quiz=quiz)
+                selected_problem_id = attempt.problem_parameters.get('selected_problem_id')
+                
+                if selected_problem_id:
+                    # Return only the selected variation
+                    problem_qp = quiz.quiz_problems.filter(problem_id=selected_problem_id).first()
+                    if problem_qp:
+                        serializer = QuizProblemDetailSerializer([problem_qp], many=True)
+                        return Response(serializer.data)
+            except QuizAttempt.DoesNotExist:
+                pass
+        
+        # Fallback: return all problems (for admin/instructor view)
         problems = quiz.quiz_problems.all()
         serializer = QuizProblemDetailSerializer(problems, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def start_attempt(self, request, pk=None):
-        """Start a new quiz attempt"""
+        """Start a new quiz attempt with random problem selection"""
+        import random
+        
+        print(f"DEBUG: start_attempt called for quiz {pk}")
+        
         quiz = self.get_object()
+        print(f"DEBUG: Quiz loaded: {quiz.title}")
+        
         user = request.user if request.user.is_authenticated else None
         
-        #if not user:
-            #return Response(
-                #{'error': 'Authentication required'},
-                #status=status.HTTP_401_UNAUTHORIZED
-            #)
         # For testing, use a default user if not authenticated
         if not user:
             from django.contrib.auth import get_user_model
             User = get_user_model()
             user, _ = User.objects.get_or_create(username='test_student', defaults={'email': 'test@example.com'})
         
+        print(f"DEBUG: User: {user.username}")
         
         # Count existing attempts
         attempt_count = QuizAttempt.objects.filter(
             quiz=quiz, 
             student=user
         ).count()
+        
+        print(f"DEBUG: Existing attempts: {attempt_count}, Max: {quiz.max_attempts}")
         
         # Check if max attempts reached
         if attempt_count >= quiz.max_attempts:
@@ -129,20 +151,41 @@ class QuizViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Get all problem variations for this quiz
+        problem_variations = quiz.quiz_problems.all().order_by('problem_order')
+        print(f"DEBUG: Found {problem_variations.count()} problem variations")
+        
+        # Randomly select one variation
+        if problem_variations.exists():
+            selected_variation = random.choice(list(problem_variations))
+            print(f"DEBUG: Selected variation {selected_variation.problem_order}")
+            problem_params = {
+                'selected_problem_id': selected_variation.problem.id,
+                'variation_number': selected_variation.problem_order
+            }
+        else:
+            problem_params = {}
+            print("DEBUG: No variations found!")
+        
         # Create new attempt
         attempt = QuizAttempt.objects.create(
             quiz=quiz,
             student=user,
             attempt_number=attempt_count + 1,
-            status='in_progress'
+            status='in_progress',
+            problem_parameters=problem_params
         )
+        
+        print(f"DEBUG: Created attempt {attempt.attempt_id}")
         
         return Response({
             'attempt_id': str(attempt.attempt_id),
             'attempt_number': attempt.attempt_number,
             'max_attempts': quiz.max_attempts,
-            'attempts_remaining': quiz.max_attempts - attempt.attempt_number
+            'attempts_remaining': quiz.max_attempts - attempt.attempt_number,
+            'selected_variation': problem_params.get('variation_number', 1)
         }, status=status.HTTP_201_CREATED)
+        
     
     @action(detail=True, methods=["get"])
     def my_attempts(self, request, pk=None):

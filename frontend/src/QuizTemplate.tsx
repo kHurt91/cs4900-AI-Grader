@@ -1,7 +1,7 @@
 // Enhanced Quiz Template with Inline Answer Boxes
 import React, { useState, useRef, useEffect } from "react";
 import "katex/dist/katex.min.css";
-import { BlockMath } from "react-katex";
+import { BlockMath, InlineMath } from "react-katex";
 
 type QuizPage = "quiz" | "details" | "submit";
 
@@ -62,9 +62,41 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
     attemptCreatedRef.current = false; // Reset for new quiz
     
     const initQuiz = async () => {
-      await fetchQuizData();
-      await createAttempt();
+      // First, fetch basic quiz info
+      try {
+        const quizResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/`);
+        if (quizResponse.ok) {
+          const quizData = await quizResponse.json();
+          setQuiz(quizData);
+          setTimeRemaining(quizData.time_limit * 60);
+          setMaxAttempts(quizData.max_attempts || 0);
+        }
+      } catch (err) {
+        console.error('Failed to load quiz:', err);
+      }
+
+      // Create attempt and get the ID
+      const newAttemptId = await createAttempt();
+      
+      // Now fetch problems with the attempt ID
+      if (newAttemptId) {
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:8000/api/quizzes/${quizId}/problems/?attempt_id=${newAttemptId}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`Loaded ${data.length} problem(s) for attempt ${newAttemptId}`);
+            setQuestions(data);
+          }
+        } catch (err) {
+          console.error('Failed to fetch problems:', err);
+        }
+      }
+      
+      setLoading(false);
     };
+    
     initQuiz();
   }, [quizId]);
 
@@ -84,41 +116,7 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
     }
   }, [boxAnswers, page, loading]);
 
-  const fetchQuizData = async () => {
-    try {
-      const quizResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/`);
-      if (quizResponse.ok) {
-        const quizData = await quizResponse.json();
-        setQuiz(quizData);
-        setTimeRemaining(quizData.time_limit * 60);
-        setMaxAttempts(quizData.max_attempts || 0);
-      }
-
-      const problemsResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/problems/`);
-      if (problemsResponse.ok) {
-        const problemsData = await problemsResponse.json();
-        setQuestions(problemsData);
-      }
-
-      // Fetch previous attempts
-      try {
-        const attemptsResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/my_attempts/`);
-        if (attemptsResponse.ok) {
-          const attemptsData = await attemptsResponse.json();
-          setPreviousAttempts(attemptsData.attempts || []);
-          setAttemptNumber((attemptsData.total_attempts || 0) + 1);
-        }
-      } catch (err) {
-        console.log('Could not fetch attempts, using attempt 1');
-        setAttemptNumber(1);
-      }
-    } catch (err) {
-      console.error('Failed to load quiz:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   const createAttempt = async () => {
     // Prevent duplicate creation using ref
     if (attemptCreatedRef.current) {
@@ -141,18 +139,21 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
         setAttemptId(data.attempt_id);
         setAttemptNumber(data.attempt_number);
         setMaxAttempts(data.max_attempts);
-        console.log(`Started attempt ${data.attempt_number} of ${data.max_attempts}`);
+        console.log(`Started attempt ${data.attempt_number} of ${data.max_attempts}, variation ${data.selected_variation}`);
+        return data.attempt_id; // Return the attempt ID
       } else {
         const error = await response.json();
         console.error('Failed to create attempt:', error);
         if (response.status === 400) {
           alert(error.error);
         }
-        attemptCreatedRef.current = false; // Reset on error
+        attemptCreatedRef.current = false;
+        return null;
       }
     } catch (err) {
       console.error('Error creating attempt:', err);
-      attemptCreatedRef.current = false; // Reset on error
+      attemptCreatedRef.current = false;
+      return null;
     }
   };
 
@@ -255,10 +256,58 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
     if (!q || !q.answer_boxes) return false;
     return q.answer_boxes.every(box => boxAnswers[box.id]?.trim());
   };
-          
+
+
+  const renderTextWithInlineMath = (text: string) => {
+    // Only match math variables with subscripts and parentheses, not regular words
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    
+    // Match: Ωₚ, Pₙ, Dₘₐₓ, U₀, P(R,θ,φ), G(Ω), etc.
+    const mathPattern = /([PUDGΩ](?:ₙ|ₘₐₓ|ᵣ|₀|ₚ)?(?:\([^)]+\))?(?:\/[PUDGΩ](?:ₙ|ₘₐₓ|ᵣ|₀|ₚ)?)?)/g;
+    
+    let match;
+    while ((match = mathPattern.exec(text)) !== null) {
+      // Add text before match
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+
+      // Convert to LaTeX
+      let mathText = match[0]
+        .replace(/Ω/g, '\\Omega')
+        .replace(/ₙ/g, '_n')
+        .replace(/ₘₐₓ/g, '_{\\max}')
+        .replace(/ᵣ/g, '_r')
+        .replace(/₀/g, '_0')
+        .replace(/ₚ/g, '_p');
+
+      parts.push(<InlineMath key={match.index} math={mathText} />);
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };     
   
   const renderQuestionText = (question: Question) => {
     let text = question.problem_text;
+    
+    // Extract and remove hint text if present
+    let hintText = '';
+    if (text.includes('is given') || text.includes('is the solution')) {
+      const hintMatch = text.match(/\n\n(.+(?:is given|is the solution).+(?:\\n\\n.+)?)\s*$/);
+      if (hintMatch) {
+        hintText = hintMatch[1];
+        // Remove hint text from main text
+        text = text.substring(0, hintMatch.index);
+      }
+    }
+    
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
 
@@ -267,6 +316,7 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
       const index = text.indexOf(placeholder, lastIndex);
       
       if (index !== -1) {
+
         if (index > lastIndex) {
           parts.push(
             <span key={`text-${lastIndex}`}>
@@ -274,6 +324,7 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
             </span>
           );
         }
+        
 
         // NESTED BOX STRUCTURE: Small box [Big box inside]
         parts.push(
@@ -289,21 +340,32 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
               
               {/* INNER BOX (Big input area) */}
               <div className="relative">
-                <textarea
-                  value={boxAnswers[box.id] || ""}
-                  onChange={(e) => handleBoxInput(box.id, e.target.value)}
-                  placeholder="Enter your LaTeX expression"
-                  className="w-full border-2 border-gray-300 rounded-md p-4 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#4E3629] focus:border-[#4E3629] font-mono text-base bg-white"
-                />
-                
-                <button
-                  type="button"
-                  onClick={() => openMathPopup(box.id)}
-                  className="absolute bottom-3 right-3 text-gray-500 hover:text-black text-2xl font-bold"
-                  title="Insert Math (LaTeX)"
-                >
-                  ∑
-                </button>
+                {box.is_readonly ? (
+                  // GREEN PRE-FILLED HINT BOX
+                  <div className="w-full border-2 border-green-300 rounded-md p-4 min-h-[100px] bg-green-50">
+                    <div className="text-xs text-green-700 mb-2 font-semibold">✓ Given as hint:</div>
+                    <BlockMath math={box.answer_template} />
+                  </div>
+                ) : (
+                  // NORMAL EDITABLE BOX
+                  <>
+                    <textarea
+                      value={boxAnswers[box.id] || ""}
+                      onChange={(e) => handleBoxInput(box.id, e.target.value)}
+                      placeholder="Enter your LaTeX expression"
+                      className="w-full border-2 border-gray-300 rounded-md p-4 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#4E3629] focus:border-[#4E3629] font-mono text-base bg-white"
+                    />
+                    
+                    <button
+                      type="button"
+                      onClick={() => openMathPopup(box.id)}
+                      className="absolute bottom-3 right-3 text-gray-500 hover:text-black text-2xl font-bold"
+                      title="Insert Math (LaTeX)"
+                    >
+                      ∑
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* LaTeX Preview */}
@@ -329,6 +391,35 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
       );
     }
 
+    // Render hint text if present (for Variations 1, 3, 4)
+    if (hintText) {
+      const lines = hintText.split('\\n\\n');
+      
+      parts.push(
+        <div key="hint-section" className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+          <div className="text-sm font-semibold text-blue-800 mb-2">💡 Hints:</div>
+          {lines.map((line, idx) => {
+            // Check if line starts with LaTeX (like \Omega_p or contains math)
+            if (line.includes('\\') && (line.includes('\\Omega') || line.includes('\\frac') || line.includes('\\int'))) {
+              // Extract the math part before "is the solution" or similar text
+              const solutionMatch = line.match(/^(.+?)(?:\s+\\text\{.*?\})?$/);
+              if (solutionMatch) {
+                const mathPart = solutionMatch[1].trim();
+                return (
+                  <div key={idx} className="mb-2">
+                    <BlockMath math={mathPart} />
+                    <span className="text-xs text-blue-600 italic">is the solution for step {line.includes('step 3') ? '3' : '4'}. Not all step solutions are given.</span>
+                  </div>
+                );
+              }
+            }
+            
+            // Plain text line
+            return <div key={idx} className="text-sm text-gray-700">{line}</div>;
+          })}
+        </div>
+      );
+    }
     return <div className="whitespace-pre-wrap leading-relaxed">{parts}</div>;
   };
 
