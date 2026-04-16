@@ -7,23 +7,27 @@ from datetime import timedelta
 
 User = get_user_model()
 
+
 class Command(BaseCommand):
-    help = 'Create Problem 8.6 with 3 variations including aperture distribution image'
+    help = 'Create Problem 8.6 — 3 variations, blank answer boxes, no hints, unlimited attempts'
 
     def handle(self, *args, **options):
+
+        # ── Instructor ────────────────────────────────────────────────────────
         instructor, _ = User.objects.get_or_create(
             username='instructor',
             defaults={
                 'email': 'instructor@example.com',
                 'role': 'instructor',
                 'first_name': 'Test',
-                'last_name': 'Instructor'
+                'last_name': 'Instructor',
             }
         )
         if not instructor.check_password('password123'):
             instructor.set_password('password123')
             instructor.save()
 
+        # ── Course ────────────────────────────────────────────────────────────
         course, _ = Course.objects.get_or_create(
             course_code='ECE5950',
             semester='spring',
@@ -31,133 +35,184 @@ class Command(BaseCommand):
             instructor=instructor,
             defaults={
                 'title': 'Telecommunications',
-                'description': 'Advanced Telecommunications Course'
+                'description': 'Advanced Telecommunications Course',
             }
         )
 
-        # Delete old quiz if exists
-        old_quiz = Quiz.objects.filter(title='Problem 8.6 - Antenna Far-Field Pattern', course=course).first()
-        if old_quiz:
-            old_quiz.delete()
+        # ── Enroll all students ───────────────────────────────────────────────
+        students = User.objects.filter(role='student')
+        for s in students:
+            course.enrolled_students.add(s)
 
-        # Create quiz - 3 attempts, 3 variations
-        quiz = Quiz.objects.create(
-            title='Problem 8.6 - Antenna Far-Field Pattern',
+        # ── Remove old quiz if present ────────────────────────────────────────
+        Quiz.objects.filter(
+            title='Problem 8.6 - Aperture Distribution and Far-Field Pattern',
             course=course,
-            description='Fourier transform problem with aperture distribution diagram',
+        ).delete()
+
+        # ── Quiz ──────────────────────────────────────────────────────────────
+        quiz = Quiz.objects.create(
+            title='Problem 8.6 - Aperture Distribution and Far-Field Pattern',
+            course=course,
+            description=(
+                r'Express the aperture distribution \(E(x)\) and derive the '
+                r'far-field pattern \(E(\phi)\) using Fourier Transform methods.'
+            ),
             quiz_type='homework',
-            time_limit=45,
+            time_limit=30,
             available_from=timezone.now(),
-            available_until=timezone.now() + timedelta(days=30),
-            max_attempts=3,
+            available_until=timezone.now() + timedelta(days=365),
+            max_attempts=9999,
             show_correct_answers=True,
             is_published=True,
             created_by=instructor,
-            total_points=20.0,
+            total_points=10.0,
         )
 
-        # Common intro with image reference
-        intro_text = r'''Find the antenna far-field pattern E(φ) for the uniform 1-d aperture distribution E(x) drawn below (Kraus Fig. 6-9), by completing the Fourier transform steps shown. Refer to the Wolframalpha website or this one: fourier.eng.hmc.edu/e101/lectures/handout3/node3.html for Fourier transform examples.
+        # ── Correct answers ───────────────────────────────────────────────────
+        #
+        # Variation 1: aperture -L/8 to +L/8  (width = L/4)
+        #   E(x)  = rect(4x/L)
+        #   E(ω)  = 2sin(Lω/8) / ω
+        #   φ     = Lω/8
+        #   E(φ)  = (L/4)(sinφ/φ)
+        #
+        # Variations 2 & 3: aperture -L/4 to +L/4  (width = L/2)
+        #   E(x)  = rect(2x/L)
+        #   E(ω)  = 2sin(Lω/4) / ω
+        #   φ     = Lω/4
+        #   E(φ)  = (L/2)(sinφ/φ)
 
-[IMAGE:aperture_distribution]'''
+        V1 = {
+            'ex':  r'\text{rect}\!\left(\frac{4x}{L}\right)',
+            'ew':  r'\frac{2\sin\!\left(\frac{L\omega}{8}\right)}{\omega}',
+            'phi': r'\frac{L\omega}{8}',
+            'ef':  r'\frac{L}{4}\cdot\frac{\sin\phi}{\phi}',
+        }
+        V23 = {
+            'ex':  r'\text{rect}\!\left(\frac{2x}{L}\right)',
+            'ew':  r'\frac{2\sin\!\left(\frac{L\omega}{4}\right)}{\omega}',
+            'phi': r'\frac{L\omega}{4}',
+            'ef':  r'\frac{L}{2}\cdot\frac{\sin\phi}{\phi}',
+        }
 
-        # Define 3 variations
+        # ── Image placeholder — served from Django static files ───────────────
+        # Place image1.jpeg at: static/images/problem8_6_aperture.jpeg
+        IMAGE = '[IMAGE:problem8_6_aperture]'
+
+        # ── Question builder ──────────────────────────────────────────────────
+        # NOTE: box labels use plain LaTeX (no \(...\) wrappers) to avoid
+        # double-rendering. The frontend already wraps them in KaTeX.
+        def make_question(region_latex):
+            return '\n'.join([
+                IMAGE,
+                '',
+                r'1. Express the aperture distribution \(E(x)\) in mathematical form'
+                r' over the aperture \(L\) (in the region '
+                + region_latex + r' only):',
+                '',
+                '[ANSWER_BOX_1]',
+                '',
+                r'2. Compute (or look up) the Fourier Transform of \(E(x)\) and'
+                r' express it in the form \(c_1 f(c_2 \omega)\)'
+                r' for some trig or exp type function \(f\):',
+                '',
+                '[ANSWER_BOX_2]',
+                '',
+                r'3. Apply a change of variable \(\phi = ?\), so that'
+                r' \(f(\phi)\) appears in the final answer:',
+                '',
+                '[ANSWER_BOX_3]',
+                '',
+                r'4. The resulting far-field is then:',
+                '',
+                '[ANSWER_BOX_4]',
+            ])
+
         variations = [
-            # Variation 1: L/4 aperture, 4 boxes, hint at step 2
+
+            # ── Variation 1: aperture -L/8 to +L/8 ───────────────────────────
             {
-                'aperture': 'L/4',
-                'region': '-L/8 to +L/8',
-                'step1_answer': r'\text{rect}(4x/L) = u(x + L/8) - u(x - L/8)',
-                'step2_answer': r'\frac{2\sin(L\omega/8)}{\omega}',
-                'step3_answer': r'\frac{L\omega}{8}',
-                'step4_answer': r'\frac{2\sin(L\omega/8)}{\omega}',
-                'hint_text': r'E(\omega) = \frac{2\sin(L\omega/8)}{\omega} \text{ is the solution for step 2. Not all step solutions are given.}',
+                'title':         'Aperture Distribution Far-Field - Variation 1',
+                'question_text': make_question(r'\(-L/8\) to \(+L/8\)'),
+                'answers':       V1,
             },
-            # Variation 2: L/2 aperture, 4 boxes, no hints
+
+            # ── Variation 2: aperture -L/4 to +L/4 ───────────────────────────
             {
-                'aperture': 'L/2',
-                'region': '-L/4 to +L/4',
-                'step1_answer': r'\text{rect}(2x/L)',
-                'step2_answer': r'\frac{2\sin(L\omega/4)}{\omega}',
-                'step3_answer': r'\frac{L\omega}{4}',
-                'step4_answer': r'\frac{L\sin(\phi)}{\phi}',
-                'hint_text': None,
+                'title':         'Aperture Distribution Far-Field - Variation 2',
+                'question_text': make_question(r'\(-L/4\) to \(+L/4\)'),
+                'answers':       V23,
             },
-            # Variation 3: L/2 aperture, all solutions shown
+
+            # ── Variation 3: aperture -L/4 to +L/4 (different seed) ───────────
             {
-                'aperture': 'L/2',
-                'region': '-L/4 to +L/4',
-                'step1_answer': r'\text{rect}(2x/L)',
-                'step2_answer': r'\frac{2\sin(L\omega/4)}{\omega}',
-                'step3_answer': r'\frac{L\omega}{4}',
-                'step4_answer': r'\frac{L\sin(\phi)}{2\phi}',
-                'hint_text': None,
-                'show_all': True,  # All answers shown
+                'title':         'Aperture Distribution Far-Field - Variation 3',
+                'question_text': make_question(r'\(-L/4\) to \(+L/4\)'),
+                'answers':       V23,
             },
         ]
 
-        for idx, var in enumerate(variations, 1):
-            question_parts = [intro_text, '']
-            
-            question_parts.append(f"1. Express the aperture distribution E(x) in mathematical form over the aperture {var['aperture']} (in the region {var['region']} only):")
-            question_parts.append('')
-            question_parts.append('E(x) = [ANSWER_BOX_1]')
-            question_parts.append('')
-            
-            question_parts.append('2. Compute (or look up) the Fourier Transform of E(x) and express it in the form c₁f(c₂ω)/c₃ for some trig or exp type function f')
-            question_parts.append('')
-            question_parts.append('E(ω) = [ANSWER_BOX_2]')
-            question_parts.append('')
-            
-            question_parts.append('3. Apply a change of variable φ = ?, so that f(φ) appears in the final answer:')
-            question_parts.append('')
-            question_parts.append('φ = [ANSWER_BOX_3]')
-            question_parts.append('')
-            
-            question_parts.append('4. The resulting far-field is then:')
-            question_parts.append('')
-            question_parts.append('E(φ) = [ANSWER_BOX_4]')
-            question_parts.append('')
-            
-            if var.get('hint_text'):
-                question_parts.append('')
-                question_parts.append(var['hint_text'])
+        # ── Build Problems ────────────────────────────────────────────────────
+        for idx, var in enumerate(variations, start=1):
 
             problem = Problem.objects.create(
-                title=f'Antenna Far-Field Pattern - Variation {idx}',
-                difficulty='advanced',
+                title=var['title'],
+                difficulty='intermediate',
                 author=instructor,
-                question_text='\n'.join(question_parts),
+                question_text=var['question_text'],
                 solution_expression='',
-                solution_explanation=f'Variation {idx}: Aperture {var["aperture"]}'
+                solution_explanation='Variation ' + str(idx) + ' of ' + str(len(variations)),
             )
 
             qp = QuizProblem.objects.create(
                 quiz=quiz,
                 problem=problem,
                 problem_order=idx,
-                points=20.0
+                points=10.0,
             )
 
-            # Create 4 answer boxes
-            for box_num in range(1, 5):
-                answer_key = f'step{box_num}_answer'
-                is_readonly = var.get('show_all', False)  # Variation 3 shows all answers
-                
-                AnswerBox.objects.create(
-                    quiz_problem=qp,
-                    box_number=box_num,
-                    box_label='',
-                    placeholder_text='Enter your LaTeX expression',
-                    expected_answer=var[answer_key],
-                    answer_template=var[answer_key] if is_readonly else '',
-                    is_readonly=is_readonly,
-                    points=5.0
-                )
+            ans = var['answers']
 
-        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.6 Complete ==='))
-        self.stdout.write(f'Quiz ID: {quiz.id}')
-        self.stdout.write(f'Variations: 3')
-        self.stdout.write(f'Max attempts: 3')
-        self.stdout.write(f'Total points: 20')
-        self.stdout.write('Includes aperture distribution image')
+            # Box labels: plain LaTeX — no \(...\) wrappers to avoid double render
+            AnswerBox.objects.create(
+                quiz_problem=qp, box_number=1,
+                box_label='E(x) =',
+                placeholder_text='Enter your LaTeX expression',
+                expected_answer=ans['ex'],
+                answer_template='', is_readonly=False, points=2.5,
+            )
+            AnswerBox.objects.create(
+                quiz_problem=qp, box_number=2,
+                box_label='E(\\omega) =',
+                placeholder_text='Enter your LaTeX expression',
+                expected_answer=ans['ew'],
+                answer_template='', is_readonly=False, points=2.5,
+            )
+            AnswerBox.objects.create(
+                quiz_problem=qp, box_number=3,
+                box_label='\\phi =',
+                placeholder_text='Enter your LaTeX expression',
+                expected_answer=ans['phi'],
+                answer_template='', is_readonly=False, points=2.5,
+            )
+            AnswerBox.objects.create(
+                quiz_problem=qp, box_number=4,
+                box_label='E(\\phi) =',
+                placeholder_text='Enter your LaTeX expression',
+                expected_answer=ans['ef'],
+                answer_template='', is_readonly=False, points=2.5,
+            )
+
+        # ── Summary ───────────────────────────────────────────────────────────
+        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.6 Created ==='))
+        self.stdout.write('  Quiz ID      : ' + str(quiz.id))
+        self.stdout.write('  Variations   : ' + str(len(variations)))
+        self.stdout.write('  Max attempts : 9999 (unlimited)')
+        self.stdout.write('  Hints        : none')
+        self.stdout.write('  Prefills     : none — all boxes blank')
+        self.stdout.write('  Total points : 10.0')
+        self.stdout.write('')
+        self.stdout.write('  IMPORTANT: Copy the aperture diagram to static files:')
+        self.stdout.write('  cp image1.jpeg static/images/problem8_6_aperture.jpeg')
+        self.stdout.write('  python3 manage.py collectstatic')

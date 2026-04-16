@@ -73,7 +73,7 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
   ],
   2: [
     {
-      id: "q18",
+      id: "q22",
       type: "Quiz",
       title: "Problem 8.3 - Antenna Definitions",
       dueText: "Available now",
@@ -82,7 +82,7 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
       evalText: "Up to 7 attempts",
     },
     {
-      id: "q19",
+      id: "q27",
       type: "Quiz",
       title: "Problem 8.4 - Beam Pattern Derivation",
       dueText: "Available now",
@@ -91,7 +91,7 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
       evalText: "Up to 4 attempts",
     },
     {
-      id: "q20",
+      id: "q25",
       type: "Quiz",
       title: "Problem 8.6 - Antenna Far-Field Pattern",
       dueText: "Available now",

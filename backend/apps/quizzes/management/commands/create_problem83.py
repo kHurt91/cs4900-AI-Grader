@@ -4,21 +4,22 @@ from apps.quizzes.models import Course, Quiz, QuizProblem, AnswerBox
 from apps.problems.models import Problem
 from django.utils import timezone
 from datetime import timedelta
-import json
 
 User = get_user_model()
 
+
 class Command(BaseCommand):
-    help = 'Create Problem 8.3 with 6 variations matching sponsor PDF'
+    help = 'Create Problem 8.3 — 6 variations, blank answer boxes, no hints, unlimited attempts'
 
     def handle(self, *args, **options):
+
         instructor, _ = User.objects.get_or_create(
             username='instructor',
             defaults={
                 'email': 'instructor@example.com',
                 'role': 'instructor',
                 'first_name': 'Test',
-                'last_name': 'Instructor'
+                'last_name': 'Instructor',
             }
         )
         if not instructor.check_password('password123'):
@@ -32,175 +33,148 @@ class Command(BaseCommand):
             instructor=instructor,
             defaults={
                 'title': 'Telecommunications',
-                'description': 'Advanced Telecommunications Course'
+                'description': 'Advanced Telecommunications Course',
             }
         )
 
-        # Delete old quiz if exists
-        old_quiz = Quiz.objects.filter(title='Problem 8.3 - Antenna Definitions', course=course).first()
-        if old_quiz:
-            old_quiz.delete()
+        Quiz.objects.filter(
+            title='Problem 8.3 - Antenna Definitions',
+            course=course,
+        ).delete()
 
-        # Create quiz - 7 attempts, 6 variations
         quiz = Quiz.objects.create(
             title='Problem 8.3 - Antenna Definitions',
             course=course,
-            description='Randomized antenna relationship questions with progressive hints',
+            description=(
+                r'Write expressions for the following antenna relationships in Chapter 8. '
+                r'Note: for power density terms, irradiance \(P\) is \([\text{W/m}^2]\) '
+                r'while intensity \(U\) is \([\text{W/rad}^2]\). '
+                r'Also, write any multiple integrals just as a single integral.'
+            ),
             quiz_type='homework',
             time_limit=30,
             available_from=timezone.now(),
-            available_until=timezone.now() + timedelta(days=30),
-            max_attempts=7,
+            available_until=timezone.now() + timedelta(days=365),
+            max_attempts=9999,
             show_correct_answers=True,
             is_published=True,
             created_by=instructor,
             total_points=10.0,
         )
 
-        # Define 6 variations matching sponsor PDF
+        INTRO = (
+            r'Write expressions for the following antenna relationships in Chapter 8. '
+            r'Note: for power density terms, irradiance \(P\) is \([\text{W/m}^2]\) '
+            r'while intensity \(U\) is \([\text{W/rad}^2]\). '
+            r'Also, write any multiple integrals just as a single integral.'
+        )
+
         variations = [
-            # Variation 1: Ωp + U₀, hint text shown below
             {
-                'intro': 'Write expressions for the following antenna relationships in Chapter 8. Note: for power density terms, irradiance P is [W/m²] while intensity U is [W/rad²]. Also, write any multiple integrals just as a single integral.',
-                'q1_text': '1. Antenna beam pattern Ωₚ in terms of normalized irradiance Pₙ(θ,φ)',
-                'q1_label': 'Ωₚ = ',
-                'q1_answer': r'\int P_n(\theta,\phi) \, d\Omega',
-                'q1_hint': None,  # No pre-fill
-                'q2_text': '2. Average radiation intensity U₀ in terms of radiated power Wᵣ',
-                'q2_label': 'U₀ = ',
+                'q1_text':   r'Antenna beam solid angle \(\Omega_p\) in terms of normalized irradiance \(P_n(\theta,\phi)\)',
+                'q1_label':  r'\(\Omega_p =\)',
+                'q1_answer': r'\int P_n(\theta,\phi)\,d\Omega',
+                'q2_text':   r'Average radiation intensity \(U_0\) in terms of radiated power \(W_r\)',
+                'q2_label':  r'\(U_0 =\)',
                 'q2_answer': r'\frac{W_r}{4\pi}',
-                'q2_hint': None,
-                'hint_text': r'Ωₚ = ∫Pₙ(θ,φ)dΩ is given  Second answer is not given.',
             },
-            # Variation 2: P/Pmax + G(Ω), no hints
             {
-                'intro': 'Write expressions for the following antenna relationships in Chapter 8. Note: for power density terms, irradiance P is [W/m²] while intensity U is [W/rad²]. Also, write any multiple integrals just as a single integral.',
-                'q1_text': '1. Ratio of irradiances P(R,θ,φ)/Pₘₐₓ in terms of a ratio of radiation intensities U',
-                'q1_label': 'P(R,θ,φ)/Pₘₐₓ = ',
+                'q1_text':   r'Ratio of irradiances \(\frac{P(R,\theta,\phi)}{P_{\max}}\) in terms of a ratio of radiation intensities \(U\)',
+                'q1_label':  r'\(\frac{P(R,\theta,\phi)}{P_{\max}} =\)',
                 'q1_answer': r'\frac{U(\theta,\phi)}{U_{\max}}',
-                'q1_hint': None,
-                'q2_text': '2. Antenna gain G(Ω) in terms of radiation intensity U',
-                'q2_label': 'G(Ω) = ',
+                'q2_text':   r'Antenna gain \(G(\Omega)\) in terms of radiation intensity \(U\)',
+                'q2_label':  r'\(G(\Omega) =\)',
                 'q2_answer': r'\frac{4\pi U(\theta,\phi)}{W_r}',
-                'q2_hint': None,
-                'hint_text': None,
             },
-            # Variation 3: P/Pmax + G(Ω), hint text shown below
             {
-                'intro': 'Write expressions for the following antenna relationships in Chapter 8. Note: for power density terms, irradiance P is [W/m²] while intensity U is [W/rad²]. Also, write any multiple integrals just as a single integral.',
-                'q1_text': '1. Ratio of irradiances P(R,θ,φ)/Pₘₐₓ in terms of a ratio of radiation intensities U',
-                'q1_label': 'P(R,θ,φ)/Pₘₐₓ = ',
+                'q1_text':   r'Ratio of irradiances \(\frac{P(R,\theta,\phi)}{P_{\max}}\) in terms of a ratio of radiation intensities \(U\)',
+                'q1_label':  r'\(\frac{P(R,\theta,\phi)}{P_{\max}} =\)',
                 'q1_answer': r'\frac{U(\theta,\phi)}{U_{\max}}',
-                'q1_hint': None,
-                'q2_text': '2. Antenna gain G(Ω) in terms of radiation intensity U',
-                'q2_label': 'G(Ω) = ',
+                'q2_text':   r'Antenna gain \(G(\Omega)\) in terms of radiation intensity \(U\)',
+                'q2_label':  r'\(G(\Omega) =\)',
                 'q2_answer': r'\frac{4\pi U(\theta,\phi)}{W_r}',
-                'q2_hint': None,
-                'hint_text': r'\frac{P(R,\theta,\phi)}{P_{\max}} = \frac{U(\Omega)}{U_{\max}} \text{ is given}\n\nSecond answer is not given.',
             },
-            # Variation 4: Wr + Ωp, hint text shown below
             {
-                'intro': 'Write expressions for the following antenna relationships in Chapter 8. Note: for power density terms, irradiance P is [W/m²] while intensity U is [W/rad²]. Also, write any multiple integrals just as a single integral.',
-                'q1_text': '1. Antenna radiated power Wᵣ in terms of radiation intensity U',
-                'q1_label': 'Wᵣ = ',
-                'q1_answer': r'\int U(\theta,\phi) \, d\Omega',
-                'q1_hint': None,
-                'q2_text': '2. Antenna beam pattern Ωₚ in terms of normalized irradiance Pₙ(θ,φ)',
-                'q2_label': 'Ωₚ = ',
-                'q2_answer': r'\int P_n(\theta,\phi) \, d\Omega',
-                'q2_hint': None,
-                'hint_text': r'Wᵣ = ∫U(Ω)dΩ is given\n\nSecond answer is not given.',
+                'q1_text':   r'Antenna radiated power \(W_r\) in terms of radiation intensity \(U\)',
+                'q1_label':  r'\(W_r =\)',
+                'q1_answer': r'\int U(\theta,\phi)\,d\Omega',
+                'q2_text':   r'Antenna beam solid angle \(\Omega_p\) in terms of normalized irradiance \(P_n(\theta,\phi)\)',
+                'q2_label':  r'\(\Omega_p =\)',
+                'q2_answer': r'\int P_n(\theta,\phi)\,d\Omega',
             },
-            # Variation 5: Pn + Ωp, BOTH boxes pre-filled
             {
-                'intro': 'Write expressions for the following antenna relationships in Chapter 8. Note: for power density terms, irradiance P is [W/m²] while intensity U is [W/rad²]. Also, write any multiple integrals just as a single integral.',
-                'q1_text': '1. Normalized power density Pₙ(θ,φ) in terms of irradiance P(R,θ,φ)',
-                'q1_label': 'Pₙ(θ,φ) = ',
+                'q1_text':   r'Normalized power density \(P_n(\theta,\phi)\) in terms of irradiance \(P(R,\theta,\phi)\)',
+                'q1_label':  r'\(P_n(\theta,\phi) =\)',
                 'q1_answer': r'\frac{P(R,\theta,\phi)}{P_{\max}}',
-                'q1_hint': r'\frac{P(R,\theta,\phi)}{P_{\max}}',  # Pre-filled
-                'q2_text': '2. Antenna beam pattern Ωₚ in terms of normalized irradiance Pₙ(θ,φ)',
-                'q2_label': 'Ωₚ = ',
-                'q2_answer': r'\int P_n(\theta,\phi) \, d\Omega',
-                'q2_hint': r'\int P_n(\theta,\phi) \, d\Omega',  # Pre-filled
-                'hint_text': None,
+                'q2_text':   r'Antenna beam solid angle \(\Omega_p\) in terms of normalized irradiance \(P_n(\theta,\phi)\)',
+                'q2_label':  r'\(\Omega_p =\)',
+                'q2_answer': r'\int P_n(\theta,\phi)\,d\Omega',
             },
-            # Variation 6: Pn + Wr, BOTH boxes pre-filled
             {
-                'intro': 'Write expressions for the following antenna relationships in Chapter 8. Note: for power density terms, irradiance P is [W/m²] while intensity U is [W/rad²]. Also, write any multiple integrals just as a single integral.',
-                'q1_text': '1. Normalized power density Pₙ(θ,φ) in terms of irradiance P(R,θ,φ)',
-                'q1_label': 'Pₙ(θ,φ) = ',
+                'q1_text':   r'Normalized power density \(P_n(\theta,\phi)\) in terms of irradiance \(P(R,\theta,\phi)\)',
+                'q1_label':  r'\(P_n(\theta,\phi) =\)',
                 'q1_answer': r'\frac{P(R,\theta,\phi)}{P_{\max}}',
-                'q1_hint': r'\frac{P(R,\theta,\phi)}{P_{\max}}',  # Pre-filled
-                'q2_text': '2. Antenna radiated power Wᵣ in terms of radiation intensity U',
-                'q2_label': 'Wᵣ = ',
-                'q2_answer': r'\int U(\theta,\phi) \, d\Omega',
-                'q2_hint': r'\int U(\theta,\phi) \, d\Omega',  # Pre-filled
-                'hint_text': None,
+                'q2_text':   r'Antenna radiated power \(W_r\) in terms of radiation intensity \(U\)',
+                'q2_label':  r'\(W_r =\)',
+                'q2_answer': r'\int U(\theta,\phi)\,d\Omega',
             },
         ]
-        # Create a problem for EACH variation
-        for idx, var in enumerate(variations, 1):
-                # Build question text with hint if present
-            question_parts = [
-                var['intro'],
+
+        for idx, var in enumerate(variations, start=1):
+            question_text = '\n'.join([
+                INTRO,
                 '',
-                var['q1_text'],
+                '1. ' + var['q1_text'],
                 '',
                 '[ANSWER_BOX_1]',
                 '',
-                var['q2_text'],
+                '2. ' + var['q2_text'],
                 '',
-                '[ANSWER_BOX_2]'
-            ]
-            
-            # Add hint text at the bottom if present
-            if var.get('hint_text'):
-                question_parts.extend(['', '', var['hint_text']])
-            
+                '[ANSWER_BOX_2]',
+            ])
+
             problem = Problem.objects.create(
-                title=f'Antenna Definitions - Variation {idx}',
+                title='Antenna Definitions - Variation ' + str(idx),
                 difficulty='intermediate',
                 author=instructor,
-                question_text='\n'.join(question_parts),
-            
+                question_text=question_text,
                 solution_expression='',
-                solution_explanation=f'Variation {idx} of 6'
+                solution_explanation='Variation ' + str(idx) + ' of ' + str(len(variations)),
             )
 
             qp = QuizProblem.objects.create(
                 quiz=quiz,
                 problem=problem,
                 problem_order=idx,
-                points=10.0
+                points=10.0,
             )
 
-            # Box 1
             AnswerBox.objects.create(
                 quiz_problem=qp,
                 box_number=1,
                 box_label=var['q1_label'],
                 placeholder_text='Enter your LaTeX expression',
                 expected_answer=var['q1_answer'],
-                answer_template=var['q1_hint'] if var['q1_hint'] else '',
-                is_readonly=bool(var['q1_hint']),
-                points=5.0
+                answer_template='',
+                is_readonly=False,
+                points=5.0,
             )
 
-            # Box 2
             AnswerBox.objects.create(
                 quiz_problem=qp,
                 box_number=2,
                 box_label=var['q2_label'],
                 placeholder_text='Enter your LaTeX expression',
                 expected_answer=var['q2_answer'],
-                answer_template=var['q2_hint'] if var['q2_hint'] else '',
-                is_readonly=bool(var['q2_hint']),
-                points=5.0
+                answer_template='',
+                is_readonly=False,
+                points=5.0,
             )
 
-        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.3 Complete ==='))
-        self.stdout.write(f'Quiz ID: {quiz.id}')
-        self.stdout.write(f'Variations: 6')
-        self.stdout.write(f'Max attempts: 7')
-        self.stdout.write(f'Total points: 10')
-        self.stdout.write('Each variation has different questions and hints')
+        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.3 Created ==='))
+        self.stdout.write('  Quiz ID      : ' + str(quiz.id))
+        self.stdout.write('  Variations   : ' + str(len(variations)))
+        self.stdout.write('  Max attempts : 9999 (unlimited)')
+        self.stdout.write('  Hints        : none')
+        self.stdout.write('  Prefills     : none — all boxes blank')
+        self.stdout.write('  Total points : 10.0')            
