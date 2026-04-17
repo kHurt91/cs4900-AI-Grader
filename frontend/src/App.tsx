@@ -336,7 +336,7 @@ async function registerUser(e: React.FormEvent) {
         setStudentCourses(mapped);
       } else {
         setInstructorCourses(mapped);
-     }
+      }
     } catch (err) {
      console.error(err);
      setError("Could not load courses.");
