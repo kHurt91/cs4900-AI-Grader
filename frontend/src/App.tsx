@@ -325,9 +325,17 @@ async function registerUser(e: React.FormEvent) {
       }
 
       if (userRole === "student") {
-       setStudentCourses(data);
+      const mapped = data.map((c: any) => ({
+        id: c.id,
+        code: c.course_code ?? c.code ?? "",
+        title: c.title ?? "",
+        term: c.semester ?? c.term ?? "",
+        instructor_name: c.instructor_name ?? "",
+      }));
+      if (userRole === "student") {
+        setStudentCourses(mapped);
       } else {
-        setInstructorCourses(data);
+        setInstructorCourses(mapped);
      }
     } catch (err) {
      console.error(err);
