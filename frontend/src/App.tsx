@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import ForgotPassword from './ForgotPassword';
 import QuizTemplate from './QuizTemplate';
+import CreateQuiz from './CreateQuiz';
 
 const ROLES= {
   student: "student",
@@ -20,7 +21,8 @@ type Page=
   | "grades"
   | "instructorCourse"
   | "instructorGrades"
-  | "createCourse";
+  | "createCourse"
+  | "createQuiz";
 
 type HistoryState = {
   page: Page;
@@ -931,7 +933,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => alert("Create Assignment (demo)")}
+                onClick={() => alert("Create Assignment coming soon!")}
                 className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
               >
                 Create Assignment
@@ -939,7 +941,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
 
               <button
                 type="button"
-                onClick={() => alert("Create Quiz (demo)")}
+                onClick={() => navigateTo("createQuiz", { instructorCourse: selectedInstructorCourse })}
                 className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
               >
                 Create Quiz
@@ -947,7 +949,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
 
               <button
                 type="button"
-                onClick={() => alert("View Submissions (demo)")}
+                onClick={() => alert("View Submissions coming soon!")}
                 className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
               >
                 View Submissions
@@ -1249,6 +1251,20 @@ if (page === "grades" && selectedCourse) {
   );
 }
   // ---------- Quiz Template ----------
+if (page === "createQuiz" && selectedInstructorCourse) {
+  return (
+    <CreateQuiz
+      setPage={setPage}
+      courseId={selectedInstructorCourse.id}
+      courseCode={selectedInstructorCourse.code}
+      accessToken={loginresult?.tokens?.access ?? ""}
+      onCreated={() => {
+        navigateTo("instructorCourse", { instructorCourse: selectedInstructorCourse });
+      }}
+    />
+  );
+}
+
 if (page === "quiz" && selectedQuizId) {
   return <QuizTemplate setPage={setPage} quizId={selectedQuizId} />;
 }
