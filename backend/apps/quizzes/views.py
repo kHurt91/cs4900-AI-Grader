@@ -312,6 +312,28 @@ class QuizViewSet(viewsets.ModelViewSet):
                 )
         return Response({'quiz_id': quiz.id, 'title': quiz.title, 'problem_count': len(data.get('problems', []))}, status=status.HTTP_201_CREATED)
 
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def course_submissions(request, course_id):
+    """Get all quiz attempts for all quizzes in a course"""
+    quizzes = Quiz.objects.filter(course_id=course_id)
+    result = []
+    for quiz in quizzes:
+        attempts = QuizAttempt.objects.filter(quiz=quiz).order_by('-started_at')
+        for attempt in attempts:
+            result.append({
+                'quiz_title': quiz.title,
+                'quiz_id': quiz.id,
+                'student': attempt.student.username,
+                'attempt_number': attempt.attempt_number,
+                'status': attempt.status,
+                'started_at': attempt.started_at.strftime('%Y-%m-%d %H:%M') if attempt.started_at else '',
+                'submitted_at': attempt.submitted_at.strftime('%Y-%m-%d %H:%M') if attempt.submitted_at else 'Not submitted',
+                'score': attempt.raw_score if attempt.raw_score is not None else '-',
+            })
+    return Response(result)
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def quiz_statistics(request):

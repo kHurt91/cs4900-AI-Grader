@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import ForgotPassword from './ForgotPassword';
 import QuizTemplate from './QuizTemplate';
 import CreateQuiz from './CreateQuiz';
+import ViewSubmissions from './ViewSubmissions';
 
 const ROLES= {
   student: "student",
@@ -22,7 +23,8 @@ type Page=
   | "instructorCourse"
   | "instructorGrades"
   | "createCourse"
-  | "createQuiz";
+  | "createQuiz"
+  | "viewSubmissions";
 
 type HistoryState = {
   page: Page;
@@ -949,7 +951,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
 
               <button
                 type="button"
-                onClick={() => alert("View Submissions coming soon!")}
+                onClick={() => navigateTo("viewSubmissions", { instructorCourse: selectedInstructorCourse })}
                 className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
               >
                 View Submissions
@@ -1251,6 +1253,16 @@ if (page === "grades" && selectedCourse) {
   );
 }
   // ---------- Quiz Template ----------
+if (page === "viewSubmissions" && selectedInstructorCourse) {
+  return (
+    <ViewSubmissions
+      courseId={selectedInstructorCourse.id}
+      courseCode={selectedInstructorCourse.code}
+      onBack={() => navigateTo("instructorCourse", { instructorCourse: selectedInstructorCourse })}
+    />
+  );
+}
+
 if (page === "createQuiz" && selectedInstructorCourse) {
   return (
     <CreateQuiz
