@@ -1009,7 +1009,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
                     <div className="md:col-span-2 p-4 flex md:block items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => alert(`Open submissions for: ${it.title} (demo)`)}
+                        onClick={() => navigateTo("viewSubmissions", { instructorCourse: selectedInstructorCourse })}
                         className="px-3 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-xs font-semibold"
                       >
                         Submissions
@@ -1017,7 +1017,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
 
                       <button
                         type="button"
-                        onClick={() => alert(`Quick grade: ${it.title} (demo)`)}
+                        onClick={() => navigateTo("instructorGrades", { instructorCourse: selectedInstructorCourse })}
                         className="mt-0 md:mt-2 px-3 py-2 rounded-full bg-[#4E3629] text-white border border-[#4E3629] shadow-sm hover:opacity-95 transition text-xs font-semibold"
                       >
                         Gradebook
