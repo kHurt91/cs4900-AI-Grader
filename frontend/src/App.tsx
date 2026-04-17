@@ -79,7 +79,7 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
       dueText: "Available now",
       submissionsText: "Not started",
       scoreText: "- / 10",
-      evalText: "Up to 7 attempts",
+      evalText: "Unlimited attempts",
     },
     {
       id: "q27",
@@ -88,7 +88,7 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
       dueText: "Available now",
       submissionsText: "Not started",
       scoreText: "- / 25",
-      evalText: "Up to 4 attempts",
+      evalText: "Unlimited attempts",
     },
     {
       id: "q25",
@@ -97,7 +97,7 @@ const DEMO_COURSE_ITEMS: Record<number, CourseItem[]> = {
       dueText: "Available now",
       submissionsText: "Not started",
       scoreText: "- / 20",
-      evalText: "Up to 3 attempts",
+      evalText: "Unlimited attempts",
     },
   ],
 };
@@ -1036,7 +1036,7 @@ if (page === "instructorGrades" && selectedInstructorCourse) {
   );
 
   return (
-    <PageShell title={`${selectedInstructorCourse.code} Gradebook`}>
+    <PageShell title={`${selectedInstructorCourse.code ?? selectedInstructorCourse.title ?? "Course"} Gradebook`}>
       <div className="rounded-2xl bg-white border shadow-sm overflow-hidden">
         <div className="h-2 bg-[#FFC72C]" />
 
