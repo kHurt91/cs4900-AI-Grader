@@ -90,7 +90,7 @@ export default function Quiztemplate({ setPage, quizId = 1 }: Props) {
         setTimeRemaining(quizData.time_limit * 60); // Convert minutes to seconds
       }
 
-      // Fetch quiz problems
+      // Fetch quiz problems 
       const problemsResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/problems/`);
       if (problemsResponse.ok) {
         const problemsData = await problemsResponse.json();
@@ -180,7 +180,7 @@ export default function Quiztemplate({ setPage, quizId = 1 }: Props) {
     if (el) {
       setTextAnswers((prev) => ({
         ...prev,
-        [qid]: el.innerHTML,
+        [qid]: el.innerHTML, 
       }));
       // Trigger autosave after a delay
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -289,7 +289,7 @@ function renderTextWithLatex(text: string) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center px-4 py-12">
+    <div className="min-h-screen bg-gray-100 flex justify-center px-4 py-12 font-serif">
       {/* Question Navigation Sidebar */}
       <div className="hidden md:flex flex-col gap-3 fixed top-32 left-8 w-20">
         {questions.map((q, index) => (
@@ -347,10 +347,9 @@ function renderTextWithLatex(text: string) {
             <div className="space-y-10">
               {questions.map((q, index) => (
                 <div key={q.id} id={`question-${q.id}`}>
-                  <p className="font-semibold mb-2 text-lg">
-                    Question {index + 1}: {renderTextWithLatex(q.text)}
+                  <p className="mb-2 text-lg whitespace-pre-wrap">
+                    {renderTextWithLatex(q.text)}
                   </p>
-                  {q.latex && <BlockMath math={q.latex} />}
 
                   {q.type === "multiple" && q.options?.map((opt) => (
                     <button
@@ -368,29 +367,41 @@ function renderTextWithLatex(text: string) {
                   ))}
 
                   {q.type === "text" && (
-                    <div className="relative">
-                      <div
-                        ref={(el) => {
-                          textRefs.current[q.id] = el;
-                        }}
-                        contentEditable
-                        suppressContentEditableWarning
-                        onInput={() => handleInput(q.id)}
-                        onKeyUp={() => saveCaret(q.id)}
-                        onClick={() => saveCaret(q.id)}
-                        onKeyDown={(e) => handleKeyDown(e, q.id)}
-                        className="w-full border rounded-xl p-3 pr-10 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-[#4E3629] whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{ __html: textAnswers[q.id] || "" }}
-                      />
+                    <div className="flex items-center gap-3 mt-2">
 
-                      <button
-                        type="button"
-                        onClick={() => openMathPopup(q.id)}
-                        className="absolute bottom-2 right-2 text-gray-500 hover:text-black text-lg"
-                        title="Insert Math (LaTeX)"
-                      >
-                        ∑
-                      </button>
+                      {/* Small editable answer box */}
+                      <div className="ml-auto relative">
+                        <div
+                          ref={(el) => {
+                            textRefs.current[q.id] = el;
+                          }}
+                          contentEditable
+                          suppressContentEditableWarning
+                          onInput={() => handleInput(q.id)}
+                          onKeyUp={() => saveCaret(q.id)}
+                          onClick={() => saveCaret(q.id)}
+                          onKeyDown={(e) => handleKeyDown(e, q.id)}
+
+                          className="
+                            w-40 min-h-[36px] max-h-[60px] overflow-y-auto   
+                            border rounded-md px-2 py-1 text-sm
+                            focus:outline-none focus:ring-2 focus:ring-[#4E3629]
+                            whitespace-pre-wrap"
+
+                          // dangerouslySetInnerHTML={{ __html: textAnswers[q.id] || "" }}
+                        />
+
+                        {/* Math button */}
+                        <button
+                          type="button"
+                          onClick={() => openMathPopup(q.id)}
+                          className="absolute -right-7 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black text-sm"
+                          title="Insert Math (LaTeX)"
+                        >
+                          ∑
+                        </button>
+                      </div>
+
                     </div>
                   )}
                 </div>
