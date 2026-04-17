@@ -3,6 +3,7 @@ import ForgotPassword from './ForgotPassword';
 import QuizTemplate from './QuizTemplate';
 import CreateQuiz from './CreateQuiz';
 import ViewSubmissions from './ViewSubmissions';
+import CreateAssignment from './CreateAssignment';
 
 const ROLES= {
   student: "student",
@@ -24,7 +25,8 @@ type Page=
   | "instructorGrades"
   | "createCourse"
   | "createQuiz"
-  | "viewSubmissions";
+  | "viewSubmissions"
+  | "createAssignment";
 
 type HistoryState = {
   page: Page;
@@ -935,7 +937,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => alert("Create Assignment coming soon!")}
+                onClick={() => navigateTo("createAssignment", { instructorCourse: selectedInstructorCourse })}
                 className="px-4 py-2 rounded-full bg-white border shadow-sm hover:shadow transition text-sm font-semibold"
               >
                 Create Assignment
@@ -1253,6 +1255,17 @@ if (page === "grades" && selectedCourse) {
   );
 }
   // ---------- Quiz Template ----------
+if (page === "createAssignment" && selectedInstructorCourse) {
+  return (
+    <CreateAssignment
+      courseId={selectedInstructorCourse.id}
+      courseCode={selectedInstructorCourse.code}
+      accessToken={loginresult?.tokens?.access ?? ""}
+      onCreated={() => navigateTo("instructorCourse", { instructorCourse: selectedInstructorCourse })}
+    />
+  );
+}
+
 if (page === "viewSubmissions" && selectedInstructorCourse) {
   return (
     <ViewSubmissions

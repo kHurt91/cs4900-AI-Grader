@@ -135,3 +135,28 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(upcoming, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["post"])
+    def create_assignment(self, request):
+        """Create a new assignment for a course"""
+        from apps.quizzes.models import Course
+        from django.utils import timezone
+        from datetime import timedelta
+        data = request.data
+        instructor = request.user if request.user.is_authenticated else None
+        if not instructor:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            instructor = User.objects.filter(role='instructor').first()
+        due = data.get('due_date') or (timezone.now() + timedelta(days=7)).isoformat()
+        assignment = Assignment.objects.create(
+            name=data.get('title', 'Untitled Assignment'),
+            description=data.get('description', ''),
+            assignment_type='homework',
+            open_date=timezone.now(),
+            due_date=due,
+            total_points=data.get('total_points', 100),
+            created_by=instructor,
+        )
+        return Response({'id': assignment.id, 'name': assignment.name}, status=status.HTTP_201_CREATED)
+
