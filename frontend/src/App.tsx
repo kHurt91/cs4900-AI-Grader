@@ -324,7 +324,6 @@ async function registerUser(e: React.FormEvent) {
         throw new Error("Failed to fetch courses");
       }
 
-      if (userRole === "student") {
       const mapped = data.map((c: any) => ({
         id: c.id,
         code: c.course_code ?? c.code ?? "",
