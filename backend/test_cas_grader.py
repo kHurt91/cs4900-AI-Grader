@@ -28,6 +28,9 @@ def test_grader():
         ("e**(-x)*cos(2*x)", "cos(2*x)/e**x", None, True),
         # Antenna problem style
         ("L/4", "0.25*L", None, True),
+        # Constant value test - hits the boundary condition path
+        ("1", "1", None, True),
+        ("2", "3", None, False),
     ]
 
     passed = 0
