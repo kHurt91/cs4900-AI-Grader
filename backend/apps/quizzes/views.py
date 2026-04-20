@@ -327,7 +327,7 @@ def course_submissions(request, course_id):
     quizzes = Quiz.objects.filter(course_id=course_id)
     result = []
     for quiz in quizzes:
-        attempts = QuizAttempt.objects.filter(quiz=quiz).order_by('-started_at')
+        attempts = QuizAttempt.objects.filter(quiz=quiz, student__role="student").order_by('-started_at')
         for attempt in attempts:
             result.append({
                 'quiz_title': quiz.title,
