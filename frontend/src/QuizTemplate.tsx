@@ -8,6 +8,7 @@ type QuizPage = "quiz" | "details" | "submit";
 interface Props {
   setPage: React.Dispatch<React.SetStateAction<any>>;
   quizId: number;
+  accessToken?: string;
 }
 
 interface AnswerBox {
@@ -52,7 +53,7 @@ const BlockMath = ({ math }: { math: string }) => {
   } catch { return <div>{math}</div>; }
 };
 
-export default function Quiztemplate({ setPage, quizId }: Props) {
+export default function Quiztemplate({ setPage, quizId, accessToken = "" }: Props) {
   const [page, setLocalPage] = useState<QuizPage>("quiz");
   const [boxAnswers, setBoxAnswers] = useState<Record<number, string>>({});
   const [activeMathBoxId, setActiveMathBoxId] = useState<number | null>(null);
@@ -127,7 +128,10 @@ export default function Quiztemplate({ setPage, quizId }: Props) {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/start_attempt/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
       });
       if (response.ok) {
         const data = await response.json();

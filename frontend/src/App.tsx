@@ -1309,7 +1309,7 @@ if (page === "createQuiz" && selectedInstructorCourse) {
 }
 
 if (page === "quiz" && selectedQuizId) {
-  return <QuizTemplate setPage={setPage} quizId={selectedQuizId} />;
+  return <QuizTemplate setPage={setPage} quizId={selectedQuizId} accessToken={loginresult?.tokens?.access ?? ""} />;
 }
 
   // ---------- logged ----------

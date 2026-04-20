@@ -128,13 +128,8 @@ class QuizViewSet(viewsets.ModelViewSet):
         print(f"DEBUG: Quiz loaded: {quiz.title}")
         
         user = request.user if request.user.is_authenticated else None
-        
-        # For testing, use a default user if not authenticated
         if not user:
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
-            user, _ = User.objects.get_or_create(username='test_student', defaults={'email': 'test@example.com'})
-        
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         print(f"DEBUG: User: {user.username}")
         
         # Count existing attempts
@@ -204,9 +199,7 @@ class QuizViewSet(viewsets.ModelViewSet):
 
         # For testing, use a default user if not authenticated
         if not user:
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
-            user, _ = User.objects.get_or_create(username='test_student', defaults={'email': 'test@example.com'})
+            return Response({'attempts': [], 'total_attempts': 0, 'max_attempts': quiz.max_attempts, 'attempts_remaining': quiz.max_attempts})
         
         attempts = QuizAttempt.objects.filter(
             quiz=quiz,
