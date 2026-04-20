@@ -212,6 +212,27 @@ useEffect(() => {
 }, [studentCourses, instructorCourses]);
 
 useEffect(() => {
+  const courseId = selectedCourse?.id ?? selectedInstructorCourse?.id;
+  if (courseId) {
+    fetch(`http://127.0.0.1:8000/api/quizzes/?course=${courseId}`)
+      .then(r => r.json())
+      .then(data => {
+        const mapped = data.map((q: any) => ({
+          id: `q${q.id}`,
+          type: "Quiz" as CourseItemType,
+          title: q.title,
+          dueText: "Available now",
+          submissionsText: "Not started",
+          scoreText: `- / ${q.total_points ?? 10}`,
+          evalText: q.max_attempts >= 9999 ? "Unlimited attempts" : `Up to ${q.max_attempts} attempts`,
+        }));
+        setCourseQuizzes(mapped);
+      })
+      .catch(() => setCourseQuizzes([]));
+  }
+}, [selectedCourse, selectedInstructorCourse]);
+
+useEffect(() => {
   window.history.replaceState(
     { page: "login" } satisfies HistoryState,
     "",
@@ -747,10 +768,7 @@ if (page === "registration") {
 }
 
 if (page === "course" && selectedCourse) {
-  console.log("Selected course:", selectedCourse);
-  console.log("Course ID:", selectedCourse.id);
-  const items = DEMO_COURSE_ITEMS[selectedCourse.id] ?? [];
-  console.log("Items found:", items);
+  const items = courseQuizzes;
   const pill = (t: CourseItemType) => (
     <span
       className={[
@@ -875,7 +893,7 @@ if (page === "course" && selectedCourse) {
 }
 
 if (page === "instructorCourse" && selectedInstructorCourse) {
-  const items = DEMO_COURSE_ITEMS[selectedInstructorCourse.id] ?? [];
+  const items = courseQuizzes;
 
   const pill = (t: CourseItemType) => (
     <span
@@ -984,7 +1002,7 @@ if (page === "instructorCourse" && selectedInstructorCourse) {
                     {/* item */}
                     <div className="md:col-span-7 p-4 md:border-r">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="font-bold text-[#4E3629]">{it.title}</div>
+                        <button type="button" onClick={() => { if (it.type === "Quiz") { setSelectedQuizId(parseInt(it.id.replace("q", ""))); navigateTo("quiz"); } }} className="font-bold text-[#4E3629] text-left hover:underline">{it.title}</button>
                         <div className="shrink-0">{pill(it.type)}</div>
                       </div>
 
