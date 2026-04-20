@@ -19,6 +19,7 @@ type Props = {
 
 export default function ViewSubmissions({ courseId, courseCode, onBack }: Props) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [allQuizTitles, setAllQuizTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [studentFilter, setStudentFilter] = useState("");
   const [selectedQuiz, setSelectedQuiz] = useState<string>("all");
@@ -28,19 +29,20 @@ export default function ViewSubmissions({ courseId, courseCode, onBack }: Props)
       .then(r => r.json())
       .then(data => { setSubmissions(data); setLoading(false); })
       .catch(() => setLoading(false));
+    fetch(`http://127.0.0.1:8000/api/quizzes/?course=${courseId}`)
+      .then(r => r.json())
+      .then(data => setAllQuizTitles(data.map((q: any) => q.title)))
+      .catch(() => {});
   }, [courseId]);
 
-  // Get unique quiz titles
-  const quizTitles = ["all", ...Array.from(new Set(submissions.map(s => s.quiz_title)))];
+  const quizTitles = ["all", ...allQuizTitles];
 
-  // Filter submissions
   const filtered = submissions.filter(s => {
     const matchStudent = s.student.toLowerCase().includes(studentFilter.toLowerCase());
     const matchQuiz = selectedQuiz === "all" || s.quiz_title === selectedQuiz;
     return matchStudent && matchQuiz;
   });
 
-  // Group by quiz
   const grouped: Record<string, Submission[]> = {};
   filtered.forEach(s => {
     if (!grouped[s.quiz_title]) grouped[s.quiz_title] = [];
@@ -69,14 +71,11 @@ export default function ViewSubmissions({ courseId, courseCode, onBack }: Props)
           </button>
         </div>
       </header>
-
       <main className="max-w-5xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-extrabold tracking-tight">Student Submissions</h1>
           <span className="text-sm text-gray-500">{filtered.length} total</span>
         </div>
-
-        {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Filter by Student</label>
@@ -100,7 +99,6 @@ export default function ViewSubmissions({ courseId, courseCode, onBack }: Props)
             </select>
           </div>
         </div>
-
         {loading ? (
           <div className="p-8 text-center text-gray-500">Loading submissions...</div>
         ) : filtered.length === 0 ? (
@@ -111,7 +109,7 @@ export default function ViewSubmissions({ courseId, courseCode, onBack }: Props)
               <div className="h-2 bg-[#FFC72C]" />
               <div className="px-6 py-4 bg-gray-50 border-b">
                 <h2 className="font-bold text-lg text-[#4E3629]">{quizTitle}</h2>
-                <p className="text-xs text-gray-500 mt-1">{subs.length} attempt{subs.length !== 1 ? 's' : ''}</p>
+                <p className="text-xs text-gray-500 mt-1">{subs.length} attempt{subs.length !== 1 ? "s" : ""}</p>
               </div>
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-xs font-bold text-gray-600 uppercase tracking-wide">
@@ -130,7 +128,7 @@ export default function ViewSubmissions({ courseId, courseCode, onBack }: Props)
                       <td className="p-4 text-gray-500">#{s.attempt_number}</td>
                       <td className="p-4">
                         <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${statusColor(s.status)}`}>
-                          {s.status.replace('_', ' ')}
+                          {s.status.replace("_", " ")}
                         </span>
                       </td>
                       <td className="p-4 text-gray-500">{s.submitted_at}</td>
