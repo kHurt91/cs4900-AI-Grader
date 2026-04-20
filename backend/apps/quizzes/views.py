@@ -121,13 +121,27 @@ class QuizViewSet(viewsets.ModelViewSet):
     def start_attempt(self, request, pk=None):
         """Start a new quiz attempt with random problem selection"""
         import random
+        from rest_framework_simplejwt.authentication import JWTAuthentication
         
         print(f"DEBUG: start_attempt called for quiz {pk}")
         
         quiz = self.get_object()
         print(f"DEBUG: Quiz loaded: {quiz.title}")
         
-        user = request.user if request.user.is_authenticated else None
+        # Try JWT authentication
+        user = None
+        try:
+            jwt_auth = JWTAuthentication()
+            auth_result = jwt_auth.authenticate(request)
+            if auth_result:
+                user = auth_result[0]
+        except Exception:
+            pass
+        
+        # Fall back to request.user
+        if not user and request.user.is_authenticated:
+            user = request.user
+            
         if not user:
             return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         print(f"DEBUG: User: {user.username}")
