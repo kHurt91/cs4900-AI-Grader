@@ -2,6 +2,7 @@
 """
 API Views for Grading System
 """
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -16,13 +17,13 @@ from apps.users.models import CustomUser
 from .engines import GradingCoordinator
 from .serializers import SubmissionSerializer, GradingResultSerializer
 
-#Import class for grading submission
-import asyncio, sys 
+# Import class for grading submission
+import asyncio, sys
 from pathlib import Path
-root_path = Path(__file__).resolve().parents[3] 
+
+root_path = Path(__file__).resolve().parents[3]
 sys.path.append(str(root_path))
 from mcp_logic.submission_test import QuizGraderClient
-
 
 
 class GradingViewSet(viewsets.ViewSet):
@@ -68,10 +69,9 @@ class GradingViewSet(viewsets.ViewSet):
         try:
             student = CustomUser.objects.get(id=student_id)
             quiz = Quiz.objects.get(id=quiz_id)
-                    # Count attempts
+            # Count attempts
             attempt_number = (
-                Submission.objects.filter(student_id=student, quiz_id=quiz).count()
-                + 1
+                Submission.objects.filter(student_id=student, quiz_id=quiz).count() + 1
             )
 
             # Create submission
@@ -88,8 +88,9 @@ class GradingViewSet(viewsets.ViewSet):
             )
         grader = QuizGraderClient()
         results = asyncio.run(grader.run_grading_workflow(student_id=student_id))
-        results_json, summary = asyncio.run(grader.run_grading_workflow(student_id=student_id))
-
+        results_json, summary = asyncio.run(
+            grader.run_grading_workflow(student_id=student_id)
+        )
 
         # # set grading [status, started_at] fields
         # submission.start_grading()
@@ -122,7 +123,6 @@ class GradingViewSet(viewsets.ViewSet):
             }
         )
 
-
     @action(detail=False, methods=["get"])
     def get_course_submissions(self, request):
         course_id = request.query_params.get("course", None)
@@ -135,9 +135,10 @@ class GradingViewSet(viewsets.ViewSet):
                 data = SubmissionSerializer(sub).data
                 student = CustomUser.objects.get(id=data["student_id"])
                 quiz = Quiz.objects.get(id=data["quiz"])
-                course_submissions.append(dict(data) | {"student": student.username, "quiz_title": quiz.title})
+                course_submissions.append(
+                    dict(data) | {"student": student.username, "quiz_title": quiz.title}
+                )
         return Response(course_submissions)
-
 
     @action(detail=False, methods=["post"])
     def submit_steps(self, request):
@@ -172,8 +173,7 @@ class GradingViewSet(viewsets.ViewSet):
 
         # Count attempts
         attempt_number = (
-            Submission.objects.filter(student=student, problem=problem).count()
-            + 1
+            Submission.objects.filter(student=student, problem=problem).count() + 1
         )
 
         # Create submission
@@ -255,7 +255,7 @@ class GradingViewSet(viewsets.ViewSet):
 
         serializer = SubmissionSerializer(submissions, many=True)
         return Response(serializer.data)
-    
+
     @action(detail=False, methods=["POST"])
     def ai_result_submit(self, request):
         "Submit AI results to backend"
@@ -264,20 +264,21 @@ class GradingViewSet(viewsets.ViewSet):
         result = request.data.get("result")
 
         submission_obj = get_object_or_404(Submission, submission_id=submission_id)
-       
-        created = GradingResult.objects.create(
-            submission = submission_obj,
-            ai_result = result
+
+        created = GradingResult.objects.update_or_create(
+            submission=submission_obj, defaults={"ai_result": result}
         )
         return Response({"status": "success"}, status=201 if created else 200)
-    
+
     @action(detail=False, methods=["GET"])
     def get_results(self, request):
         win_number = request.query_params.get("win_number")
-        results = GradingResult.objects.filter(submission__student__win_number = win_number)
+        results = GradingResult.objects.filter(
+            submission__student__win_number=win_number
+        )
 
         serializer = GradingResultSerializer(results, many=True)
-        return Response(serializer.data)        
+        return Response(serializer.data)
 
 
 @api_view(["GET"])

@@ -12,90 +12,278 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('problems', '0003_alter_problem_variables'),
+        ("problems", "0003_alter_problem_variables"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GradingEngine',
+            name="GradingEngine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('engine_type', models.CharField(choices=[('cas', 'Computer Algebra System'), ('ai', 'Artificial Intelligence'), ('hybrid', 'CAS + AI Fallback'), ('manual', 'Manual Grading')], max_length=20)),
-                ('version', models.CharField(max_length=20)),
-                ('description', models.TextField(blank=True)),
-                ('config_parameters', models.JSONField(default=dict)),
-                ('accuracy_rate', models.FloatField(default=0.0, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(1.0)])),
-                ('average_response_time', models.FloatField(default=0.0)),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_default', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "engine_type",
+                    models.CharField(
+                        choices=[
+                            ("cas", "Computer Algebra System"),
+                            ("ai", "Artificial Intelligence"),
+                            ("hybrid", "CAS + AI Fallback"),
+                            ("manual", "Manual Grading"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("version", models.CharField(max_length=20)),
+                ("description", models.TextField(blank=True)),
+                ("config_parameters", models.JSONField(default=dict)),
+                (
+                    "accuracy_rate",
+                    models.FloatField(
+                        default=0.0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(1.0),
+                        ],
+                    ),
+                ),
+                ("average_response_time", models.FloatField(default=0.0)),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_default", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Grading Engine',
-                'verbose_name_plural': 'Grading Engines',
-                'db_table': 'grading_engines',
-                'ordering': ['name'],
+                "verbose_name": "Grading Engine",
+                "verbose_name_plural": "Grading Engines",
+                "db_table": "grading_engines",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='GradingResult',
+            name="GradingResult",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cas_result', models.JSONField(blank=True, help_text='Results from CAS evaluation', null=True)),
-                ('ai_result', models.TextField(blank=True, help_text='Results from AI evaluation', null=True)),
-                ('equivalency_steps', models.JSONField(blank=True, default=list, help_text='Step-by-step equivalency checking process', null=True)),
-                ('feedback_message', models.TextField(blank=True)),
-                ('hint_message', models.TextField(blank=True)),
-                ('solution_steps', models.JSONField(blank=True, default=list)),
-                ('cas_confidence', models.FloatField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(1.0)])),
-                ('ai_confidence', models.FloatField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(1.0)])),
-                ('processing_time', models.FloatField(blank=True, help_text='Total processing time in seconds', null=True)),
-                ('memory_usage', models.FloatField(blank=True, help_text='Peak memory usage in MB', null=True)),
-                ('needs_review', models.BooleanField(default=False)),
-                ('reviewed_at', models.DateTimeField(blank=True, null=True)),
-                ('review_notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewed_submissions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "cas_result",
+                    models.JSONField(
+                        blank=True, help_text="Results from CAS evaluation", null=True
+                    ),
+                ),
+                (
+                    "ai_result",
+                    models.TextField(
+                        blank=True, help_text="Results from AI evaluation", null=True
+                    ),
+                ),
+                (
+                    "equivalency_steps",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text="Step-by-step equivalency checking process",
+                        null=True,
+                    ),
+                ),
+                ("feedback_message", models.TextField(blank=True)),
+                ("hint_message", models.TextField(blank=True)),
+                ("solution_steps", models.JSONField(blank=True, default=list)),
+                (
+                    "cas_confidence",
+                    models.FloatField(
+                        blank=True,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(1.0),
+                        ],
+                    ),
+                ),
+                (
+                    "ai_confidence",
+                    models.FloatField(
+                        blank=True,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(1.0),
+                        ],
+                    ),
+                ),
+                (
+                    "processing_time",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Total processing time in seconds",
+                        null=True,
+                    ),
+                ),
+                (
+                    "memory_usage",
+                    models.FloatField(
+                        blank=True, help_text="Peak memory usage in MB", null=True
+                    ),
+                ),
+                ("needs_review", models.BooleanField(default=False)),
+                ("reviewed_at", models.DateTimeField(blank=True, null=True)),
+                ("review_notes", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "reviewed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="reviewed_submissions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Grading Result',
-                'verbose_name_plural': 'Grading Results',
-                'db_table': 'grading_results',
+                "verbose_name": "Grading Result",
+                "verbose_name_plural": "Grading Results",
+                "db_table": "grading_results",
             },
         ),
         migrations.CreateModel(
-            name='Submission',
+            name="Submission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('submission_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('content', models.JSONField(default=dict, help_text='User submission content')),
-                ('student_answer', models.TextField(help_text="Student's answer in LaTeX format")),
-                ('raw_input', models.TextField(blank=True, help_text='Original student input before processing')),
-                ('problem_parameters', models.JSONField(blank=True, default=dict, help_text='Parameter values used for this specific problem instance')),
-                ('expected_answer', models.TextField(blank=True, help_text='Calculated expected answer for these parameters')),
-                ('is_correct', models.BooleanField(blank=True, null=True)),
-                ('score', models.FloatField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(100.0)])),
-                ('grading_method', models.CharField(choices=[('cas_only', 'CAS Only'), ('ai_only', 'AI Only'), ('cas_ai_fallback', 'CAS with AI Fallback'), ('manual', 'Manual Review')], default='cas_ai_fallback', max_length=20)),
-                ('submitted_at', models.DateTimeField(auto_now_add=True)),
-                ('grading_started_at', models.DateTimeField(blank=True, null=True)),
-                ('grading_completed_at', models.DateTimeField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('pending', 'Pending Evaluation'), ('grading', 'Currently Grading'), ('completed', 'Grading Completed'), ('error', 'Grading Error'), ('manual_review', 'Needs Manual Review')], default='pending', max_length=20)),
-                ('attempt_number', models.PositiveIntegerField(default=1)),
-                ('time_spent', models.FloatField(blank=True, help_text='Time spent on problem in seconds', null=True)),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.TextField(blank=True)),
-                ('session_key', models.CharField(blank=True, max_length=40)),
-                ('grading_engine', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='grading.gradingengine')),
-                ('problem', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='submissions', to='problems.problem')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "submission_id",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                (
+                    "content",
+                    models.JSONField(default=dict, help_text="User submission content"),
+                ),
+                (
+                    "student_answer",
+                    models.TextField(help_text="Student's answer in LaTeX format"),
+                ),
+                (
+                    "raw_input",
+                    models.TextField(
+                        blank=True, help_text="Original student input before processing"
+                    ),
+                ),
+                (
+                    "problem_parameters",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text="Parameter values used for this specific problem instance",
+                    ),
+                ),
+                (
+                    "expected_answer",
+                    models.TextField(
+                        blank=True,
+                        help_text="Calculated expected answer for these parameters",
+                    ),
+                ),
+                ("is_correct", models.BooleanField(blank=True, null=True)),
+                (
+                    "score",
+                    models.FloatField(
+                        blank=True,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(100.0),
+                        ],
+                    ),
+                ),
+                (
+                    "grading_method",
+                    models.CharField(
+                        choices=[
+                            ("cas_only", "CAS Only"),
+                            ("ai_only", "AI Only"),
+                            ("cas_ai_fallback", "CAS with AI Fallback"),
+                            ("manual", "Manual Review"),
+                        ],
+                        default="cas_ai_fallback",
+                        max_length=20,
+                    ),
+                ),
+                ("submitted_at", models.DateTimeField(auto_now_add=True)),
+                ("grading_started_at", models.DateTimeField(blank=True, null=True)),
+                ("grading_completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending Evaluation"),
+                            ("grading", "Currently Grading"),
+                            ("completed", "Grading Completed"),
+                            ("error", "Grading Error"),
+                            ("manual_review", "Needs Manual Review"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("attempt_number", models.PositiveIntegerField(default=1)),
+                (
+                    "time_spent",
+                    models.FloatField(
+                        blank=True,
+                        help_text="Time spent on problem in seconds",
+                        null=True,
+                    ),
+                ),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.TextField(blank=True)),
+                ("session_key", models.CharField(blank=True, max_length=40)),
+                (
+                    "grading_engine",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="grading.gradingengine",
+                    ),
+                ),
+                (
+                    "problem",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="submissions",
+                        to="problems.problem",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Submission',
-                'verbose_name_plural': 'Submissions',
-                'db_table': 'submissions',
-                'ordering': ['-submitted_at'],
+                "verbose_name": "Submission",
+                "verbose_name_plural": "Submissions",
+                "db_table": "submissions",
+                "ordering": ["-submitted_at"],
             },
         ),
     ]

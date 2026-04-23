@@ -6,9 +6,7 @@ from .models import Submission, GradingResult
 class GradingResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = GradingResult
-        fields = [
-            "ai_result"
-        ]
+        fields = ["ai_result"]
 
 
 class SubmissionSerializer(serializers.ModelSerializer):

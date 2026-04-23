@@ -10,37 +10,56 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('grading', '0001_initial'),
-        ('quizzes', '0001_initial'),
+        ("grading", "0001_initial"),
+        ("quizzes", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='submission',
-            name='quiz',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='submissions', to='quizzes.quiz'),
+            model_name="submission",
+            name="quiz",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="submissions",
+                to="quizzes.quiz",
+            ),
         ),
         migrations.AddField(
-            model_name='submission',
-            name='student_id',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='submissions', to=settings.AUTH_USER_MODEL),
+            model_name="submission",
+            name="student_id",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="submissions",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='gradingresult',
-            name='submission',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='result', to='grading.submission'),
+            model_name="gradingresult",
+            name="submission",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="result",
+                to="grading.submission",
+            ),
         ),
         migrations.AddIndex(
-            model_name='submission',
-            index=models.Index(fields=['student_id', 'quiz_id'], name='submissions_student_6e247f_idx'),
+            model_name="submission",
+            index=models.Index(
+                fields=["student_id", "quiz_id"], name="submissions_student_6e247f_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='submission',
-            index=models.Index(fields=['status', 'submitted_at'], name='submissions_status_ac0821_idx'),
+            model_name="submission",
+            index=models.Index(
+                fields=["status", "submitted_at"], name="submissions_status_ac0821_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='submission',
-            index=models.Index(fields=['grading_engine', 'grading_method'], name='submissions_grading_122ed9_idx'),
+            model_name="submission",
+            index=models.Index(
+                fields=["grading_engine", "grading_method"],
+                name="submissions_grading_122ed9_idx",
+            ),
         ),
     ]

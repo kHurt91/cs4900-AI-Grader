@@ -1795,3 +1795,110 @@ AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse`
 INFO 2026-05-01 20:02:06,429 autoreload Watching for file changes with StatReloader
 WARNING 2026-05-01 20:02:31,844 log Not Found: /favicon.ico
 INFO 2026-05-01 20:25:46,478 autoreload Watching for file changes with StatReloader
+INFO 2026-05-04 09:25:45,029 autoreload Watching for file changes with StatReloader
+INFO 2026-05-04 09:29:15,687 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:29:15,688 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:29:15,691 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:29:15,739 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:29:15,743 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:29:15,782 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:29:15,782 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:29:15,784 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:29:15,820 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:29:15,823 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:35:25,400 autoreload /Users/chaedelarosa/WMU/spring26/cs4910/cs4900-AI-Grader/backend/apps/grading/views.py changed, reloading.
+INFO 2026-05-04 09:35:26,116 autoreload Watching for file changes with StatReloader
+INFO 2026-05-04 09:35:43,342 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:35:43,343 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:35:43,345 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:35:43,393 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:35:43,396 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:35:43,430 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:35:43,430 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:35:43,432 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:35:43,471 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:35:43,475 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:39:31,332 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:39:31,333 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:39:31,337 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:39:31,387 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:39:31,391 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:39:31,399 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:39:31,399 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:39:31,400 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:39:31,436 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:39:31,439 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:46:20,767 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:46:20,769 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:46:20,772 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:46:20,821 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:46:20,824 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:46:20,834 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:46:20,834 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:46:20,836 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:46:20,868 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:46:20,871 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:47:09,548 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:47:09,549 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:47:09,553 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:47:09,602 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:47:09,605 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:47:09,617 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:47:09,617 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:47:09,619 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:47:09,658 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:47:09,661 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:54:27,389 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:54:27,390 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:54:27,394 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:54:27,457 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:54:27,461 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:54:27,469 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:54:27,469 streamable_http Negotiated protocol version: 2025-11-25
+INFO 2026-05-04 09:54:27,471 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 202 Accepted"
+INFO 2026-05-04 09:54:27,510 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 09:54:27,513 _client HTTP Request: POST http://127.0.0.1:4000/mcp "HTTP/1.1 200 OK"
+INFO 2026-05-04 12:21:40,679 autoreload Watching for file changes with StatReloader
+INFO 2026-05-04 12:21:47,709 autoreload Watching for file changes with StatReloader
+INFO 2026-05-04 17:38:02,547 autoreload /Users/chaedelarosa/WMU/spring26/cs4910/cs4900-AI-Grader/backend/apps/grading/views.py changed, reloading.
+INFO 2026-05-04 17:38:03,557 autoreload Watching for file changes with StatReloader
+WARNING 2026-05-04 17:42:02,532 ai_symbolic_grader OpenAI not installed. AI grading will be disabled.
+INFO 2026-05-04 17:42:02,532 ai_symbolic_grader AI grading disabled - using SymPy only
+INFO 2026-05-04 17:42:02,532 ai_symbolic_grader Grading - Student: '0.5*exp(-x)*cos(2.0*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,641 ai_symbolic_grader Grading - Student: '(0.5)*exp(-x)*cos(2.0*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,660 ai_symbolic_grader Grading - Student: '0.5*exp(-1.0*x)*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,749 ai_symbolic_grader Grading - Student: '0.5*(exp(-x))*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,797 ai_symbolic_grader Grading - Student: '(1/2)*exp(-x)*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,850 ai_symbolic_grader Grading - Student: 'exp(-x)/2*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,895 ai_symbolic_grader Grading - Student: 'exp(-x)*cos(2*x)/2' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,941 ai_symbolic_grader Grading - Student: '(1/2)*cos(2*x)*exp(-x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:02,990 ai_symbolic_grader Grading - Student: '0.499999*cos(2*x)*exp(-x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:42:03,055 ai_symbolic_grader AI grading disabled - using SymPy only
+INFO 2026-05-04 17:42:03,055 ai_symbolic_grader Grading - Student: 'exp(-x)/2*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2*x)'
+INFO 2026-05-04 17:45:01,825 autoreload Watching for file changes with StatReloader
+WARNING 2026-05-04 17:45:06,290 ai_symbolic_grader OpenAI not installed. AI grading will be disabled.
+INFO 2026-05-04 17:45:06,290 ai_symbolic_grader AI grading disabled - using SymPy only
+INFO 2026-05-04 17:45:06,290 ai_symbolic_grader Grading - Student: '0.5*exp(-x)*cos(2.0*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,394 ai_symbolic_grader Grading - Student: '(0.5)*exp(-x)*cos(2.0*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,414 ai_symbolic_grader Grading - Student: '0.5*exp(-1.0*x)*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,499 ai_symbolic_grader Grading - Student: '0.5*(exp(-x))*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,548 ai_symbolic_grader Grading - Student: '(1/2)*exp(-x)*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,604 ai_symbolic_grader Grading - Student: 'exp(-x)/2*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,649 ai_symbolic_grader Grading - Student: 'exp(-x)*cos(2*x)/2' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,694 ai_symbolic_grader Grading - Student: '(1/2)*cos(2*x)*exp(-x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,742 ai_symbolic_grader Grading - Student: '0.499999*cos(2*x)*exp(-x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:06,804 ai_symbolic_grader AI grading disabled - using SymPy only
+INFO 2026-05-04 17:45:06,804 ai_symbolic_grader Grading - Student: 'exp(-x)/2*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2*x)'
+WARNING 2026-05-04 17:45:45,438 ai_symbolic_grader OpenAI not installed. AI grading will be disabled.
+INFO 2026-05-04 17:45:45,438 ai_symbolic_grader AI grading disabled - using SymPy only
+INFO 2026-05-04 17:45:45,438 ai_symbolic_grader Grading - Student: '0.5*exp(-x)*cos(2.0*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,547 ai_symbolic_grader Grading - Student: '(0.5)*exp(-x)*cos(2.0*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,568 ai_symbolic_grader Grading - Student: '0.5*exp(-1.0*x)*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,659 ai_symbolic_grader Grading - Student: '0.5*(exp(-x))*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,709 ai_symbolic_grader Grading - Student: '(1/2)*exp(-x)*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,765 ai_symbolic_grader Grading - Student: 'exp(-x)/2*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,810 ai_symbolic_grader Grading - Student: 'exp(-x)*cos(2*x)/2' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,856 ai_symbolic_grader Grading - Student: '(1/2)*cos(2*x)*exp(-x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,905 ai_symbolic_grader Grading - Student: '0.499999*cos(2*x)*exp(-x)' vs Correct: '0.5*exp(-x)*cos(2.0*x)'
+INFO 2026-05-04 17:45:45,966 ai_symbolic_grader AI grading disabled - using SymPy only
+INFO 2026-05-04 17:45:45,966 ai_symbolic_grader Grading - Student: 'exp(-x)/2*cos(2*x)' vs Correct: '0.5*exp(-x)*cos(2*x)'

@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('problems', '0002_probleminstance'),
+        ("problems", "0002_probleminstance"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='problem',
-            name='variables',
-            field=models.JSONField(blank=True, default=dict, help_text="Variable definitions: {var_name: {min: val, max: val, type: 'int'|'float', step: val}}"),
+            model_name="problem",
+            name="variables",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Variable definitions: {var_name: {min: val, max: val, type: 'int'|'float', step: val}}",
+            ),
         ),
     ]

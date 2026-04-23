@@ -2,6 +2,7 @@
 """
 Serializers for Quiz Management API
 """
+
 from rest_framework import serializers
 from .models import (
     Course,
@@ -17,14 +18,14 @@ from ..users.models import CustomUser
 from ..problems.models import Problem, ProblemPart
 
 
-
 class CourseSerializer(serializers.ModelSerializer):
     """Serializer for Course"""
-    instructor_id= serializers.IntegerField()
+
+    instructor_id = serializers.IntegerField()
 
     class Meta:
-        model= Course
-        fields= [
+        model = Course
+        fields = [
             "id",
             "title",
             "course_code",
@@ -39,18 +40,18 @@ class CourseSerializer(serializers.ModelSerializer):
             course_code=validated_data["course_code"],
             semester=validated_data["semester"],
             description="",
-            year=2026,  #TODO: get year
-            instructor=instructor
-
+            year=2026,  # TODO: get year
+            instructor=instructor,
         )
         return course
 
     def update(self, instance, validated_data):
-        """ Allow course editing
+        """Allow course editing
         serializer = CourseSerializer(instance, data=data)
         """
-        #TODO: Update course info
+        # TODO: Update course info
         ...
+
 
 class CourseEnrollmentSerializer(serializers.ModelSerializer):
     """Serializer for CourseEnrollment"""
@@ -59,6 +60,7 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
         model = CourseEnrollment
         fields = "__all__"
 
+
 class QuizProblemCreateSerializer(serializers.Serializer):
     title = serializers.CharField()
     question_text = serializers.CharField()
@@ -66,11 +68,14 @@ class QuizProblemCreateSerializer(serializers.Serializer):
     correct_answer = serializers.CharField(required=False, allow_blank=True, default="")
     problem_order = serializers.IntegerField()
     points = serializers.FloatField(required=False, default=1.0)
-    custom_instructions = serializers.CharField(required=False, allow_blank=True, default="")
+    custom_instructions = serializers.CharField(
+        required=False, allow_blank=True, default=""
+    )
     time_limit_override = serializers.IntegerField(required=False, allow_null=True)
     parameter_overrides = serializers.JSONField(required=False, default=dict)
     figure = serializers.CharField(required=False, allow_blank=True, default="")
     parts = serializers.ListField(required=False, default=list)
+
 
 class QuizSerializer(serializers.ModelSerializer):
     problems = QuizProblemCreateSerializer(many=True, write_only=True, required=False)
@@ -133,15 +138,17 @@ class QuizSerializer(serializers.ModelSerializer):
         quiz.calculate_total_points()
         return quiz
 
+
 class QuizProblemSerializer(serializers.ModelSerializer):
     """Serializer for QuizProblem"""
+
     question_text = serializers.SerializerMethodField()
 
     class Meta:
         model = QuizProblem
         fields = "__all__"
 
-        extra_fields = ['question_text']
+        extra_fields = ["question_text"]
 
     def get_question_text(self, obj):
         return obj.problem.question_text
@@ -196,48 +203,53 @@ class QuizStatisticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizStatistics
         fields = "__all__"
+
+
 class AnswerBoxSerializer(serializers.ModelSerializer):
     """Serializer for Answer Boxes"""
+
     class Meta:
         model = AnswerBox
         fields = [
-            'id',
-            'box_number',
-            'box_label',
-            'placeholder_text',
-            'expected_answer',
-            'allow_approximation',
-            'approximation_tolerance',
-            'points',
-            'answer_template',  # NEW
-            'is_readonly',      # NEW
+            "id",
+            "box_number",
+            "box_label",
+            "placeholder_text",
+            "expected_answer",
+            "allow_approximation",
+            "approximation_tolerance",
+            "points",
+            "answer_template",  # NEW
+            "is_readonly",  # NEW
         ]
+
 
 class AnswerSubmissionSerializer(serializers.ModelSerializer):
     """Serializer for Answer Submissions"""
+
     class Meta:
         model = AnswerSubmission
         fields = [
-            'id',
-            'answer_box',
-            'student_answer',
-            'is_correct',
-            'ai_feedback',
-            'points_earned',
-            'graded_at',
-            'submitted_at',
+            "id",
+            "answer_box",
+            "student_answer",
+            "is_correct",
+            "ai_feedback",
+            "points_earned",
+            "graded_at",
+            "submitted_at",
         ]
 
 
 class QuizProblemDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for QuizProblem with answer boxes"""
+
     problem_text = serializers.CharField(source="problem.question_text", read_only=True)
     problem_title = serializers.CharField(source="problem.title", read_only=True)
     answer_boxes = AnswerBoxSerializer(many=True, read_only=True)
     figure = serializers.SerializerMethodField()
     parts = serializers.SerializerMethodField()
 
-    
     class Meta:
         model = QuizProblem
         fields = [
@@ -259,7 +271,7 @@ class QuizProblemDetailSerializer(serializers.ModelSerializer):
     def get_figure(self, obj):
         files = obj.problem.supplementary_files or []
         return files[0] if files else None
-    
+
     def get_parts(self, obj):
         return [
             {
@@ -273,4 +285,3 @@ class QuizProblemDetailSerializer(serializers.ModelSerializer):
             }
             for part in obj.problem.parts.all().order_by("part_number")
         ]
-        

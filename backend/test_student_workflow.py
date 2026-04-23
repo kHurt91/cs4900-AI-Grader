@@ -9,7 +9,7 @@ django.setup()
 
 from apps.problems.models import Problem
 from apps.users.models import CustomUser
-from apps.grading.models import StudentSubmission, GradingEngine
+from apps.grading.models import Submission, GradingEngine
 from apps.grading.services.cas_grader import CASGrader
 
 
@@ -72,7 +72,7 @@ def simulate_student_submission():
         score = 100.0 if is_correct else 0.0
 
         # Create submission record
-        submission = StudentSubmission.objects.create(
+        submission = Submission.objects.create(
             student=student,
             problem=problem,
             student_answer=attempt["answer"],
@@ -99,7 +99,7 @@ def simulate_student_submission():
     print(f"{'='*70}")
 
     # Show summary
-    all_submissions = StudentSubmission.objects.filter(
+    all_submissions = Submission.objects.filter(
         student=student, problem=problem
     ).order_by("-submitted_at")[:5]
 

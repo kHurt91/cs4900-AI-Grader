@@ -5,33 +5,48 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 import traceback, json, os
 
+
 class QuizGraderClient:
     def __init__(self, base_url="http://127.0.0.1:4000/mcp"):
         load_dotenv()
         self.base_url = base_url
         self.api_key = os.getenv("ANTHROPIC API KEY")
-        self.anthropic = Anthropic(api_key = self.api_key)
-     
+        self.anthropic = Anthropic(api_key=self.api_key)
+
     async def run_grading_workflow(self, student_id: int):
         """Main workflow to get info, grade, and post results"""
         try:
-            async with streamable_http_client(self.base_url) as (read, write, session_id):
-                 async with ClientSession(read, write) as session:
+            async with streamable_http_client(self.base_url) as (
+                read,
+                write,
+                session_id,
+            ):
+                async with ClientSession(read, write) as session:
                     await session.initialize()
 
-                    result = await session.call_tool("grade_quiz_submission", {"student_id": student_id})
+                    result = await session.call_tool(
+                        "grade_quiz_submission", {"student_id": student_id}
+                    )
                     prompt = self.build_grading_prompt(result.structuredContent)
                     ai_response = self.get_ai_grade(prompt)
 
                     json_result, summary = self.parse_ai_response(ai_response)
 
-                    post_result = await session.call_tool("post_submission", {"submission_id": result.structuredContent['submission_struct']['submission_id'], "result": ai_response.content[0].text})
+                    post_result = await session.call_tool(
+                        "post_submission",
+                        {
+                            "submission_id": result.structuredContent[
+                                "submission_struct"
+                            ]["submission_id"],
+                            "result": ai_response.content[0].text,
+                        },
+                    )
                     return json_result, summary
-                 
+
         except Exception as e:
             print(f"An error occured during grading: {str(e)}")
             return {}, ""
-    
+
     def build_grading_prompt(self, data):
         """Build claude prompt"""
         return f"""Please grade the following quiz submission. 
@@ -58,28 +73,27 @@ class QuizGraderClient:
     def get_ai_grade(self, prompt):
         """Sync call to Anthropic API"""
         response = self.anthropic.messages.create(
-            model= "claude-haiku-4-5-20251001",
+            model="claude-haiku-4-5-20251001",
             max_tokens=1000,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
         return response
-    
+
     def parse_ai_response(self, ai_response):
         try:
             string = ai_response.content[0].text
-            json_string_end = string.rfind(']') + 1
+            json_string_end = string.rfind("]") + 1
             json_str = string[7:json_string_end].strip()
             print(json_str)
 
             results_data = json.loads(json_str)
             summary = string[json_string_end:]
             print(summary)
-            
+
             return results_data, summary
         except Exception as e:
             print(f"Error occurred while parsing ai_response:{e}")
             return {}, ""
-        
 
 
 if __name__ == "__main__":
@@ -87,12 +101,12 @@ if __name__ == "__main__":
     asyncio.run(grader.run_grading_workflow(student_id=4))
 
 
-#async def main():
+# async def main():
 #    #Set up client, streams and connention to server
 #    async with streamable_http_client("http://127.0.0.1:8000/mcp") as (read_stream, write_stream, get_session_id):
 #        async with ClientSession(read_stream, write_stream) as session:
 #            await session.initialize()
-#            
+#
 #            #List available tools
 #            tools = await session.list_tools()
 #            print(f"Available tools: {[tool.name for tool in tools.tools]}")
@@ -108,10 +122,10 @@ if __name__ == "__main__":
 #            Your answer will be the correct answer in each case.
 #            The students answers will be in a single string seperated by commas.
 #            The students answers and the problems are already in the same order.
-#        
+#
 #            Student Submission:
 #            {json.dumps(result.structuredContent['submission_struct'], indent=2)}
-#        
+#
 #            Quiz Problems:
 #            {json.dumps(result.structuredContent['quiz_struct'], indent=2)}
 #

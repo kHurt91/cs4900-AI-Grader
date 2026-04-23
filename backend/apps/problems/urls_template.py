@@ -1,6 +1,7 @@
 """
 URL Configuration for Problem Templates and Instances
 """
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.problems.views_template import ProblemTemplateViewSet, ProblemInstanceViewSet

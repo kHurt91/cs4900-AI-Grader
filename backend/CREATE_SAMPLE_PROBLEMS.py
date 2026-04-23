@@ -2,6 +2,7 @@
 Script to create sample problems from PDF examples
 Run with: python manage.py shell < CREATE_SAMPLE_PROBLEMS.py
 """
+
 from apps.problems.models import Problem, ProblemCategory
 from apps.users.models import CustomUser
 

@@ -12,250 +12,581 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('problems', '0003_alter_problem_variables'),
+        ("problems", "0003_alter_problem_variables"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AnswerBox',
+            name="AnswerBox",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('box_number', models.PositiveIntegerField()),
-                ('box_label', models.CharField(blank=True, max_length=100)),
-                ('placeholder_text', models.CharField(blank=True, max_length=200)),
-                ('expected_answer', models.TextField()),
-                ('allow_approximation', models.BooleanField(default=False)),
-                ('approximation_tolerance', models.FloatField(blank=True, null=True)),
-                ('points', models.FloatField(default=1.0)),
-                ('answer_template', models.TextField(blank=True, help_text="LaTeX template with [BLANK] markers, e.g., '\\Omega_p = \\int [BLANK] d\\Omega'")),
-                ('is_readonly', models.BooleanField(default=False, help_text="If true, show answer but don't allow editing")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("box_number", models.PositiveIntegerField()),
+                ("box_label", models.CharField(blank=True, max_length=100)),
+                ("placeholder_text", models.CharField(blank=True, max_length=200)),
+                ("expected_answer", models.TextField()),
+                ("allow_approximation", models.BooleanField(default=False)),
+                ("approximation_tolerance", models.FloatField(blank=True, null=True)),
+                ("points", models.FloatField(default=1.0)),
+                (
+                    "answer_template",
+                    models.TextField(
+                        blank=True,
+                        help_text="LaTeX template with [BLANK] markers, e.g., '\\Omega_p = \\int [BLANK] d\\Omega'",
+                    ),
+                ),
+                (
+                    "is_readonly",
+                    models.BooleanField(
+                        default=False,
+                        help_text="If true, show answer but don't allow editing",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Answer Box',
-                'verbose_name_plural': 'Answer Boxes',
-                'db_table': 'answer_boxes',
-                'ordering': ['box_number'],
+                "verbose_name": "Answer Box",
+                "verbose_name_plural": "Answer Boxes",
+                "db_table": "answer_boxes",
+                "ordering": ["box_number"],
             },
         ),
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('course_code', models.CharField(help_text='e.g., MATH 1220, ENGR 2130', max_length=20)),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField(blank=True)),
-                ('semester', models.CharField(choices=[('fall', 'Fall'), ('winter', 'Winter'), ('spring', 'Spring'), ('summer', 'Summer')], max_length=20)),
-                ('year', models.PositiveIntegerField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('allow_late_submissions', models.BooleanField(default=True)),
-                ('late_penalty_percent', models.FloatField(default=10.0, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(100.0)])),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('instructor', models.ForeignKey(limit_choices_to={'role': 'instructor'}, on_delete=django.db.models.deletion.CASCADE, related_name='taught_courses', to=settings.AUTH_USER_MODEL)),
-                ('teaching_assistants', models.ManyToManyField(blank=True, limit_choices_to={'role__in': ['instructor', 'admin']}, related_name='assisted_courses', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "course_code",
+                    models.CharField(
+                        help_text="e.g., MATH 1220, ENGR 2130", max_length=20
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "semester",
+                    models.CharField(
+                        choices=[
+                            ("fall", "Fall"),
+                            ("winter", "Winter"),
+                            ("spring", "Spring"),
+                            ("summer", "Summer"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("year", models.PositiveIntegerField()),
+                ("is_active", models.BooleanField(default=True)),
+                ("allow_late_submissions", models.BooleanField(default=True)),
+                (
+                    "late_penalty_percent",
+                    models.FloatField(
+                        default=10.0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(100.0),
+                        ],
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "instructor",
+                    models.ForeignKey(
+                        limit_choices_to={"role": "instructor"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="taught_courses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "teaching_assistants",
+                    models.ManyToManyField(
+                        blank=True,
+                        limit_choices_to={"role__in": ["instructor", "admin"]},
+                        related_name="assisted_courses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Course',
-                'verbose_name_plural': 'Courses',
-                'db_table': 'courses',
-                'ordering': ['-year', '-semester', 'course_code'],
+                "verbose_name": "Course",
+                "verbose_name_plural": "Courses",
+                "db_table": "courses",
+                "ordering": ["-year", "-semester", "course_code"],
             },
         ),
         migrations.CreateModel(
-            name='CourseEnrollment',
+            name="CourseEnrollment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('enrollment_date', models.DateTimeField(auto_now_add=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('current_grade', models.CharField(blank=True, max_length=5)),
-                ('grade_percentage', models.FloatField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(100.0)])),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quizzes.course')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("enrollment_date", models.DateTimeField(auto_now_add=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("current_grade", models.CharField(blank=True, max_length=5)),
+                (
+                    "grade_percentage",
+                    models.FloatField(
+                        blank=True,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(100.0),
+                        ],
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="quizzes.course"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Course Enrollment',
-                'verbose_name_plural': 'Course Enrollments',
-                'db_table': 'course_enrollments',
-                'unique_together': {('student', 'course')},
+                "verbose_name": "Course Enrollment",
+                "verbose_name_plural": "Course Enrollments",
+                "db_table": "course_enrollments",
+                "unique_together": {("student", "course")},
             },
         ),
         migrations.AddField(
-            model_name='course',
-            name='enrolled_students',
-            field=models.ManyToManyField(blank=True, limit_choices_to={'role': 'student'}, related_name='enrolled_courses', through='quizzes.CourseEnrollment', to=settings.AUTH_USER_MODEL),
+            model_name="course",
+            name="enrolled_students",
+            field=models.ManyToManyField(
+                blank=True,
+                limit_choices_to={"role": "student"},
+                related_name="enrolled_courses",
+                through="quizzes.CourseEnrollment",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='Quiz',
+            name="Quiz",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField(blank=True)),
-                ('quiz_type', models.CharField(choices=[('practice', 'Practice Quiz'), ('homework', 'Homework Assignment'), ('exam', 'Examination'), ('quiz', 'Graded Quiz')], default='quiz', max_length=20)),
-                ('time_limit', models.PositiveIntegerField(blank=True, help_text='Time limit in minutes (null for no limit)', null=True)),
-                ('available_from', models.DateTimeField(help_text='When quiz becomes available')),
-                ('available_until', models.DateTimeField(help_text='When quiz becomes unavailable')),
-                ('max_attempts', models.PositiveIntegerField(default=1, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
-                ('allow_review', models.BooleanField(default=True, help_text='Allow students to review after submission')),
-                ('show_correct_answers', models.BooleanField(default=True)),
-                ('show_solution_after', models.DateTimeField(blank=True, null=True)),
-                ('randomize_problems', models.BooleanField(default=False)),
-                ('randomize_parameters', models.BooleanField(default=True)),
-                ('total_points', models.FloatField(default=0.0)),
-                ('passing_score', models.FloatField(default=70.0, validators=[django.core.validators.MinValueValidator(0.0), django.core.validators.MaxValueValidator(100.0)])),
-                ('require_password', models.BooleanField(default=False)),
-                ('password', models.CharField(blank=True, max_length=50)),
-                ('ip_restrictions', models.TextField(blank=True, help_text='Comma-separated IP addresses or ranges')),
-                ('is_published', models.BooleanField(default=False)),
-                ('is_practice_mode', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quizzes', to='quizzes.course')),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_quizzes', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "quiz_type",
+                    models.CharField(
+                        choices=[
+                            ("practice", "Practice Quiz"),
+                            ("homework", "Homework Assignment"),
+                            ("exam", "Examination"),
+                            ("quiz", "Graded Quiz"),
+                        ],
+                        default="quiz",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "time_limit",
+                    models.PositiveIntegerField(
+                        blank=True,
+                        help_text="Time limit in minutes (null for no limit)",
+                        null=True,
+                    ),
+                ),
+                (
+                    "available_from",
+                    models.DateTimeField(help_text="When quiz becomes available"),
+                ),
+                (
+                    "available_until",
+                    models.DateTimeField(help_text="When quiz becomes unavailable"),
+                ),
+                (
+                    "max_attempts",
+                    models.PositiveIntegerField(
+                        default=1,
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(10),
+                        ],
+                    ),
+                ),
+                (
+                    "allow_review",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Allow students to review after submission",
+                    ),
+                ),
+                ("show_correct_answers", models.BooleanField(default=True)),
+                ("show_solution_after", models.DateTimeField(blank=True, null=True)),
+                ("randomize_problems", models.BooleanField(default=False)),
+                ("randomize_parameters", models.BooleanField(default=True)),
+                ("total_points", models.FloatField(default=0.0)),
+                (
+                    "passing_score",
+                    models.FloatField(
+                        default=70.0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0.0),
+                            django.core.validators.MaxValueValidator(100.0),
+                        ],
+                    ),
+                ),
+                ("require_password", models.BooleanField(default=False)),
+                ("password", models.CharField(blank=True, max_length=50)),
+                (
+                    "ip_restrictions",
+                    models.TextField(
+                        blank=True, help_text="Comma-separated IP addresses or ranges"
+                    ),
+                ),
+                ("is_published", models.BooleanField(default=False)),
+                ("is_practice_mode", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="quizzes",
+                        to="quizzes.course",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="created_quizzes",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Quiz',
-                'verbose_name_plural': 'Quizzes',
-                'db_table': 'quizzes',
-                'ordering': ['-created_at'],
+                "verbose_name": "Quiz",
+                "verbose_name_plural": "Quizzes",
+                "db_table": "quizzes",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='QuizAttempt',
+            name="QuizAttempt",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('attempt_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('attempt_number', models.PositiveIntegerField()),
-                ('status', models.CharField(choices=[('in_progress', 'In Progress'), ('submitted', 'Submitted'), ('auto_submitted', 'Auto-submitted (Time Expired)'), ('abandoned', 'Abandoned'), ('grading', 'Being Graded'), ('completed', 'Grading Complete')], default='in_progress', max_length=20)),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('submitted_at', models.DateTimeField(blank=True, null=True)),
-                ('time_spent', models.PositiveIntegerField(default=0, help_text='Time spent in seconds')),
-                ('raw_score', models.FloatField(blank=True, null=True)),
-                ('percentage_score', models.FloatField(blank=True, null=True)),
-                ('is_passing', models.BooleanField(blank=True, null=True)),
-                ('problem_order', models.JSONField(default=list, help_text='Randomized problem order for this attempt')),
-                ('problem_parameters', models.JSONField(default=dict, help_text='Generated parameters for each problem')),
-                ('ip_address', models.GenericIPAddressField(blank=True, null=True)),
-                ('user_agent', models.TextField(blank=True)),
-                ('session_data', models.JSONField(blank=True, default=dict)),
-                ('proctoring_data', models.JSONField(blank=True, default=dict)),
-                ('quiz', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attempts', to='quizzes.quiz')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quiz_attempts', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "attempt_id",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                ("attempt_number", models.PositiveIntegerField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("in_progress", "In Progress"),
+                            ("submitted", "Submitted"),
+                            ("auto_submitted", "Auto-submitted (Time Expired)"),
+                            ("abandoned", "Abandoned"),
+                            ("grading", "Being Graded"),
+                            ("completed", "Grading Complete"),
+                        ],
+                        default="in_progress",
+                        max_length=20,
+                    ),
+                ),
+                ("started_at", models.DateTimeField(auto_now_add=True)),
+                ("submitted_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "time_spent",
+                    models.PositiveIntegerField(
+                        default=0, help_text="Time spent in seconds"
+                    ),
+                ),
+                ("raw_score", models.FloatField(blank=True, null=True)),
+                ("percentage_score", models.FloatField(blank=True, null=True)),
+                ("is_passing", models.BooleanField(blank=True, null=True)),
+                (
+                    "problem_order",
+                    models.JSONField(
+                        default=list,
+                        help_text="Randomized problem order for this attempt",
+                    ),
+                ),
+                (
+                    "problem_parameters",
+                    models.JSONField(
+                        default=dict, help_text="Generated parameters for each problem"
+                    ),
+                ),
+                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("user_agent", models.TextField(blank=True)),
+                ("session_data", models.JSONField(blank=True, default=dict)),
+                ("proctoring_data", models.JSONField(blank=True, default=dict)),
+                (
+                    "quiz",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attempts",
+                        to="quizzes.quiz",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="quiz_attempts",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Quiz Attempt',
-                'verbose_name_plural': 'Quiz Attempts',
-                'db_table': 'quiz_attempts',
-                'ordering': ['-started_at'],
+                "verbose_name": "Quiz Attempt",
+                "verbose_name_plural": "Quiz Attempts",
+                "db_table": "quiz_attempts",
+                "ordering": ["-started_at"],
             },
         ),
         migrations.CreateModel(
-            name='AnswerSubmission',
+            name="AnswerSubmission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('student_answer', models.TextField()),
-                ('is_correct', models.BooleanField(blank=True, null=True)),
-                ('ai_feedback', models.TextField(blank=True)),
-                ('points_earned', models.FloatField(default=0.0)),
-                ('graded_at', models.DateTimeField(blank=True, null=True)),
-                ('submitted_at', models.DateTimeField(auto_now_add=True)),
-                ('answer_box', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quizzes.answerbox')),
-                ('attempt', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answer_submissions', to='quizzes.quizattempt')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("student_answer", models.TextField()),
+                ("is_correct", models.BooleanField(blank=True, null=True)),
+                ("ai_feedback", models.TextField(blank=True)),
+                ("points_earned", models.FloatField(default=0.0)),
+                ("graded_at", models.DateTimeField(blank=True, null=True)),
+                ("submitted_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "answer_box",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="quizzes.answerbox",
+                    ),
+                ),
+                (
+                    "attempt",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="answer_submissions",
+                        to="quizzes.quizattempt",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Answer Submission',
-                'verbose_name_plural': 'Answer Submissions',
-                'db_table': 'answer_submissions',
-                'ordering': ['submitted_at'],
+                "verbose_name": "Answer Submission",
+                "verbose_name_plural": "Answer Submissions",
+                "db_table": "answer_submissions",
+                "ordering": ["submitted_at"],
             },
         ),
         migrations.CreateModel(
-            name='QuizProblem',
+            name="QuizProblem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('problem_order', models.PositiveIntegerField()),
-                ('points', models.FloatField(default=1.0, validators=[django.core.validators.MinValueValidator(0.1)])),
-                ('custom_instructions', models.TextField(blank=True)),
-                ('time_limit_override', models.PositiveIntegerField(blank=True, null=True)),
-                ('parameter_overrides', models.JSONField(blank=True, default=dict, help_text='Override default parameter ranges for this quiz')),
-                ('problem', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='problems.problem')),
-                ('quiz', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quiz_problems', to='quizzes.quiz')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("problem_order", models.PositiveIntegerField()),
+                (
+                    "points",
+                    models.FloatField(
+                        default=1.0,
+                        validators=[django.core.validators.MinValueValidator(0.1)],
+                    ),
+                ),
+                ("custom_instructions", models.TextField(blank=True)),
+                (
+                    "time_limit_override",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "parameter_overrides",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text="Override default parameter ranges for this quiz",
+                    ),
+                ),
+                (
+                    "problem",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="problems.problem",
+                    ),
+                ),
+                (
+                    "quiz",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="quiz_problems",
+                        to="quizzes.quiz",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Quiz Problem',
-                'verbose_name_plural': 'Quiz Problems',
-                'db_table': 'quiz_problems',
-                'ordering': ['quiz', 'problem_order'],
+                "verbose_name": "Quiz Problem",
+                "verbose_name_plural": "Quiz Problems",
+                "db_table": "quiz_problems",
+                "ordering": ["quiz", "problem_order"],
             },
         ),
         migrations.AddField(
-            model_name='quiz',
-            name='problems',
-            field=models.ManyToManyField(related_name='quizzes', through='quizzes.QuizProblem', to='problems.problem'),
+            model_name="quiz",
+            name="problems",
+            field=models.ManyToManyField(
+                related_name="quizzes",
+                through="quizzes.QuizProblem",
+                to="problems.problem",
+            ),
         ),
         migrations.AddField(
-            model_name='answerbox',
-            name='quiz_problem',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answer_boxes', to='quizzes.quizproblem'),
+            model_name="answerbox",
+            name="quiz_problem",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="answer_boxes",
+                to="quizzes.quizproblem",
+            ),
         ),
         migrations.CreateModel(
-            name='QuizStatistics',
+            name="QuizStatistics",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('total_attempts', models.PositiveIntegerField(default=0)),
-                ('unique_students', models.PositiveIntegerField(default=0)),
-                ('completed_attempts', models.PositiveIntegerField(default=0)),
-                ('average_score', models.FloatField(default=0.0)),
-                ('median_score', models.FloatField(default=0.0)),
-                ('highest_score', models.FloatField(default=0.0)),
-                ('lowest_score', models.FloatField(default=0.0)),
-                ('standard_deviation', models.FloatField(default=0.0)),
-                ('average_completion_time', models.FloatField(default=0.0)),
-                ('median_completion_time', models.FloatField(default=0.0)),
-                ('grade_distribution', models.JSONField(default=dict, help_text="Grade distribution: {'A': count, 'B': count, ...}")),
-                ('last_updated', models.DateTimeField(auto_now=True)),
-                ('quiz', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='statistics', to='quizzes.quiz')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("total_attempts", models.PositiveIntegerField(default=0)),
+                ("unique_students", models.PositiveIntegerField(default=0)),
+                ("completed_attempts", models.PositiveIntegerField(default=0)),
+                ("average_score", models.FloatField(default=0.0)),
+                ("median_score", models.FloatField(default=0.0)),
+                ("highest_score", models.FloatField(default=0.0)),
+                ("lowest_score", models.FloatField(default=0.0)),
+                ("standard_deviation", models.FloatField(default=0.0)),
+                ("average_completion_time", models.FloatField(default=0.0)),
+                ("median_completion_time", models.FloatField(default=0.0)),
+                (
+                    "grade_distribution",
+                    models.JSONField(
+                        default=dict,
+                        help_text="Grade distribution: {'A': count, 'B': count, ...}",
+                    ),
+                ),
+                ("last_updated", models.DateTimeField(auto_now=True)),
+                (
+                    "quiz",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="statistics",
+                        to="quizzes.quiz",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Quiz Statistics',
-                'verbose_name_plural': 'Quiz Statistics',
-                'db_table': 'quiz_statistics',
+                "verbose_name": "Quiz Statistics",
+                "verbose_name_plural": "Quiz Statistics",
+                "db_table": "quiz_statistics",
             },
         ),
         migrations.AlterUniqueTogether(
-            name='course',
-            unique_together={('course_code', 'semester', 'year', 'instructor')},
+            name="course",
+            unique_together={("course_code", "semester", "year", "instructor")},
         ),
         migrations.AddIndex(
-            model_name='quizattempt',
-            index=models.Index(fields=['student', 'quiz'], name='quiz_attemp_student_1efa68_idx'),
+            model_name="quizattempt",
+            index=models.Index(
+                fields=["student", "quiz"], name="quiz_attemp_student_1efa68_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='quizattempt',
-            index=models.Index(fields=['status', 'started_at'], name='quiz_attemp_status_396e4e_idx'),
+            model_name="quizattempt",
+            index=models.Index(
+                fields=["status", "started_at"], name="quiz_attemp_status_396e4e_idx"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='quizattempt',
-            unique_together={('student', 'quiz', 'attempt_number')},
+            name="quizattempt",
+            unique_together={("student", "quiz", "attempt_number")},
         ),
         migrations.AlterUniqueTogether(
-            name='answersubmission',
-            unique_together={('attempt', 'answer_box')},
+            name="answersubmission",
+            unique_together={("attempt", "answer_box")},
         ),
         migrations.AlterUniqueTogether(
-            name='quizproblem',
-            unique_together={('quiz', 'problem')},
+            name="quizproblem",
+            unique_together={("quiz", "problem")},
         ),
         migrations.AddIndex(
-            model_name='quiz',
-            index=models.Index(fields=['course', 'is_published'], name='quizzes_course__98b22b_idx'),
+            model_name="quiz",
+            index=models.Index(
+                fields=["course", "is_published"], name="quizzes_course__98b22b_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='quiz',
-            index=models.Index(fields=['available_from', 'available_until'], name='quizzes_availab_e3a10c_idx'),
+            model_name="quiz",
+            index=models.Index(
+                fields=["available_from", "available_until"],
+                name="quizzes_availab_e3a10c_idx",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='answerbox',
-            unique_together={('quiz_problem', 'box_number')},
+            name="answerbox",
+            unique_together={("quiz_problem", "box_number")},
         ),
     ]

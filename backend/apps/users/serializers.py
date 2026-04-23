@@ -10,7 +10,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["id", "username", "email", "win_number", "first_name", "last_name", "date_joined"]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "win_number",
+            "first_name",
+            "last_name",
+            "date_joined",
+        ]
         read_only_fields = ["id", "date_joined"]
 
 
@@ -40,6 +48,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
             first_name=validated_data.get("first_name", ""),
             last_name=validated_data.get("last_name", ""),
-            role=validated_data.get("role", "student")
+            role=validated_data.get("role", "student"),
         )
         return user

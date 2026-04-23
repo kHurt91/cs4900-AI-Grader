@@ -7,32 +7,41 @@ from datetime import timedelta
 
 User = get_user_model()
 
+
 class Command(BaseCommand):
-    help = 'Create Problem 8.4 CORRECT - 1 question, 4 attempts allowed'
+    help = "Create Problem 8.4 CORRECT - 1 question, 4 attempts allowed"
 
     def handle(self, *args, **options):
         instructor, _ = User.objects.get_or_create(
-            username='instructor',
-            defaults={'email': 'instructor@example.com', 'role': 'instructor', 
-                     'first_name': 'Test', 'last_name': 'Instructor'}
+            username="instructor",
+            defaults={
+                "email": "instructor@example.com",
+                "role": "instructor",
+                "first_name": "Test",
+                "last_name": "Instructor",
+            },
         )
-        if not instructor.check_password('password123'):
-            instructor.set_password('password123')
+        if not instructor.check_password("password123"):
+            instructor.set_password("password123")
             instructor.save()
 
-        course = Course.objects.get(course_code='ECE5950', semester='spring', year=2026, instructor=instructor)
+        course = Course.objects.get(
+            course_code="ECE5950", semester="spring", year=2026, instructor=instructor
+        )
 
         # Delete old quiz if exists
-        old_quiz = Quiz.objects.filter(title='Problem 8.4 - Beam Pattern Derivation', course=course).first()
+        old_quiz = Quiz.objects.filter(
+            title="Problem 8.4 - Beam Pattern Derivation", course=course
+        ).first()
         if old_quiz:
             old_quiz.delete()
 
         # Create quiz with max_attempts = 4 (SPONSOR REQUIREMENT)
         quiz = Quiz.objects.create(
-            title='Problem 8.4 - Beam Pattern Derivation',
+            title="Problem 8.4 - Beam Pattern Derivation",
             course=course,
-            description='Multi-step derivation. Students can attempt 4 times.',
-            quiz_type='homework',
+            description="Multi-step derivation. Students can attempt 4 times.",
+            quiz_type="homework",
             time_limit=60,
             available_from=timezone.now(),
             available_until=timezone.now() + timedelta(days=30),
@@ -45,10 +54,10 @@ class Command(BaseCommand):
 
         # Create ONE problem with all 5 steps (NOT 4 questions!)
         problem = Problem.objects.create(
-            title='Beam Pattern Derivation',
-            difficulty='advanced',
+            title="Beam Pattern Derivation",
+            difficulty="advanced",
             author=instructor,
-            question_text='''Complete the derivation steps indicated below to show that
+            question_text="""Complete the derivation steps indicated below to show that
 
 Ωₚ = 4π/Dₘₐₓ
 
@@ -76,39 +85,56 @@ where Ωₚ is the antenna beam pattern and Dₘₐₓ is the directivity.
 
 [ANSWER_BOX_5]
 
-This integral then evaluates to give the final form desired.''',
-            solution_expression='',
-            solution_explanation='Progressive learning through multiple attempts'
+This integral then evaluates to give the final form desired.""",
+            solution_expression="",
+            solution_explanation="Progressive learning through multiple attempts",
         )
 
         # Create ONE quiz problem (not 4!)
-        qp = QuizProblem.objects.create(quiz=quiz, problem=problem, problem_order=1, points=25.0)
-        
-        # Create 5 answer boxes (one for each step)
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=1, box_label='Ωₚ = ',
-            expected_answer=r'\int P_n(\theta,\phi) \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=2, box_label='Ωₚ = ',
-            expected_answer=r'\int \frac{P(R,\theta,\phi)}{P_{\max}} \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=3, box_label='Ωₚ = ',
-            expected_answer=r'\int \frac{U(\Omega)}{U_{\max}} \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=4, box_label='Ωₚ = ',
-            expected_answer=r'\frac{U_{\max}}{U_0} \int \frac{U(\Omega)}{U_{\max}} \, d\Omega', points=5.0
-        )
-        AnswerBox.objects.create(
-            quiz_problem=qp, box_number=5, box_label='Ωₚ = ',
-            expected_answer=r'\frac{4\pi}{D_{\max}}', points=5.0
+        qp = QuizProblem.objects.create(
+            quiz=quiz, problem=problem, problem_order=1, points=25.0
         )
 
-        self.stdout.write(self.style.SUCCESS('\n=== Problem 8.4 CORRECTED ==='))
-        self.stdout.write(f'Quiz ID: {quiz.id}')
-        self.stdout.write(f'Questions: 1 (with 5 steps)')
-        self.stdout.write(f'Answer boxes: 5')
-        self.stdout.write(f'Max attempts: 4')
-        self.stdout.write(f'Total points: 25')
+        # Create 5 answer boxes (one for each step)
+        AnswerBox.objects.create(
+            quiz_problem=qp,
+            box_number=1,
+            box_label="Ωₚ = ",
+            expected_answer=r"\int P_n(\theta,\phi) \, d\Omega",
+            points=5.0,
+        )
+        AnswerBox.objects.create(
+            quiz_problem=qp,
+            box_number=2,
+            box_label="Ωₚ = ",
+            expected_answer=r"\int \frac{P(R,\theta,\phi)}{P_{\max}} \, d\Omega",
+            points=5.0,
+        )
+        AnswerBox.objects.create(
+            quiz_problem=qp,
+            box_number=3,
+            box_label="Ωₚ = ",
+            expected_answer=r"\int \frac{U(\Omega)}{U_{\max}} \, d\Omega",
+            points=5.0,
+        )
+        AnswerBox.objects.create(
+            quiz_problem=qp,
+            box_number=4,
+            box_label="Ωₚ = ",
+            expected_answer=r"\frac{U_{\max}}{U_0} \int \frac{U(\Omega)}{U_{\max}} \, d\Omega",
+            points=5.0,
+        )
+        AnswerBox.objects.create(
+            quiz_problem=qp,
+            box_number=5,
+            box_label="Ωₚ = ",
+            expected_answer=r"\frac{4\pi}{D_{\max}}",
+            points=5.0,
+        )
+
+        self.stdout.write(self.style.SUCCESS("\n=== Problem 8.4 CORRECTED ==="))
+        self.stdout.write(f"Quiz ID: {quiz.id}")
+        self.stdout.write(f"Questions: 1 (with 5 steps)")
+        self.stdout.write(f"Answer boxes: 5")
+        self.stdout.write(f"Max attempts: 4")
+        self.stdout.write(f"Total points: 25")

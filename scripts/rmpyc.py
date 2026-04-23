@@ -1,6 +1,7 @@
 """
 usage: python scripts/rmpyc.py [Directory]
 """
+
 import os
 
 from sys import argv, exit

@@ -123,7 +123,11 @@ class CASGrader:
             return False, 0.0
 
     def _numerical_equivalency_check(
-        self, expr1: sp.Expr, expr2: sp.Expr, num_tests: int = 10, tolerance: float=None
+        self,
+        expr1: sp.Expr,
+        expr2: sp.Expr,
+        num_tests: int = 10,
+        tolerance: float = None,
     ) -> bool:
         """Check equivalency by evaluating at random points"""
         _tolerance = tolerance if tolerance else self.tolerance

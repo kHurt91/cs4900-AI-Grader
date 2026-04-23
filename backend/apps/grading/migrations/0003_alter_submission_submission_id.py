@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grading', '0002_initial'),
+        ("grading", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='submission',
-            name='submission_id',
-            field=models.UUIDField(auto_created=True, default=uuid.uuid4, editable=False, unique=True),
+            model_name="submission",
+            name="submission_id",
+            field=models.UUIDField(
+                auto_created=True, default=uuid.uuid4, editable=False, unique=True
+            ),
         ),
     ]

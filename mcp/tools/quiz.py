@@ -3,10 +3,10 @@ from domain.models import Quiz
 import traceback
 
 
-def fetch_quiz(quiz_id:int):
+def fetch_quiz(quiz_id: int):
     data = get_quiz(quiz_id)
     try:
-        quiz = Quiz(data['id'], data['problems'], data['title'], data['course'])
+        quiz = Quiz(data["id"], data["problems"], data["title"], data["course"])
 
     except:
         print("Processing Error")

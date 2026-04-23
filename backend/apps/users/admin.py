@@ -46,6 +46,6 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(CustomUser)
-#admin.site.register(CustomUserAdmin)
+# admin.site.register(CustomUserAdmin)
 admin.site.register(UserProfile)
 admin.site.register(UserSession)

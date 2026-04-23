@@ -9,7 +9,7 @@ django.setup()
 
 from apps.problems.models import Problem
 from apps.users.models import CustomUser
-from apps.grading.models import StudentSubmission, GradingResult, GradingEngine
+from apps.grading.models import Submission, GradingResult, GradingEngine
 from apps.grading.services.cas_grader import CASGrader
 from django.utils import timezone
 

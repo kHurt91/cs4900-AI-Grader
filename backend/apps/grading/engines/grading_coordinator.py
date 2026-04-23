@@ -11,8 +11,7 @@ class GradingCoordinator:
         self.pattern_grader = PatternGrader()
         self.ai_grader = AIGrader()
 
-    def grade_quiz(self, quiz):
-        ...
+    def grade_quiz(self, quiz): ...
 
     def grade(self, problem, student_answer):
         method = self._detect_grading_method(problem, student_answer)

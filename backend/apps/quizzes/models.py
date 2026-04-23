@@ -433,9 +433,11 @@ class QuizStatistics(models.Model):
             quiz=self.quiz, is_passing=True, status="completed"
         ).count()
         return (passing_count / self.completed_attempts) * 100
-    
+
+
 class AnswerBox(models.Model):
     """Individual answer box within a problem (for multi-box problems like Problem 8.3)"""
+
     quiz_problem = models.ForeignKey(
         QuizProblem, on_delete=models.CASCADE, related_name="answer_boxes"
     )
@@ -446,28 +448,33 @@ class AnswerBox(models.Model):
     allow_approximation = models.BooleanField(default=False)
     approximation_tolerance = models.FloatField(null=True, blank=True)
     points = models.FloatField(default=1.0)
-    
+
     # NEW FIELD: Template showing equation structure with [BLANK] for fill-in parts
-    answer_template = models.TextField(blank=True, help_text="LaTeX template with [BLANK] markers, e.g., '\\Omega_p = \\int [BLANK] d\\Omega'")
-    
+    answer_template = models.TextField(
+        blank=True,
+        help_text="LaTeX template with [BLANK] markers, e.g., '\\Omega_p = \\int [BLANK] d\\Omega'",
+    )
+
     # NEW FIELD: Mark as read-only (for "is given" answers)
-    is_readonly = models.BooleanField(default=False, help_text="If true, show answer but don't allow editing")
-    
+    is_readonly = models.BooleanField(
+        default=False, help_text="If true, show answer but don't allow editing"
+    )
+
     class Meta:
-        db_table = 'answer_boxes'
-        verbose_name = 'Answer Box'
-        verbose_name_plural = 'Answer Boxes'
-        ordering = ['box_number']
-        unique_together = ['quiz_problem', 'box_number']
-    
+        db_table = "answer_boxes"
+        verbose_name = "Answer Box"
+        verbose_name_plural = "Answer Boxes"
+        ordering = ["box_number"]
+        unique_together = ["quiz_problem", "box_number"]
+
     def __str__(self):
         return f"{self.quiz_problem} - Box #{self.box_number}"
 
 
 class AnswerSubmission(models.Model):
-    #"""Student's answer to a specific answer box"""
+    # """Student's answer to a specific answer box"""
     attempt = models.ForeignKey(
-    QuizAttempt, on_delete=models.CASCADE, related_name="answer_submissions"
+        QuizAttempt, on_delete=models.CASCADE, related_name="answer_submissions"
     )
     answer_box = models.ForeignKey(AnswerBox, on_delete=models.CASCADE)
     student_answer = models.TextField()  # Student's answer in LaTeX or text
@@ -476,15 +483,13 @@ class AnswerSubmission(models.Model):
     points_earned = models.FloatField(default=0.0)
     graded_at = models.DateTimeField(null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        db_table = 'answer_submissions'
-        verbose_name = 'Answer Submission'
-        verbose_name_plural = 'Answer Submissions'
-        unique_together = ['attempt', 'answer_box']
-        ordering = ['submitted_at']
-    
+        db_table = "answer_submissions"
+        verbose_name = "Answer Submission"
+        verbose_name_plural = "Answer Submissions"
+        unique_together = ["attempt", "answer_box"]
+        ordering = ["submitted_at"]
+
     def __str__(self):
         return f"{self.attempt.student.username} - Box #{self.answer_box.box_number}"
-    
-
