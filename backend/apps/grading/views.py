@@ -114,13 +114,13 @@ class GradingViewSet(viewsets.ViewSet):
         # )
 
         # Return result
-        # return Response(
-        #     {
-        #         "submission_datetime": str(submission.submitted_at),
-        #         "attempt_number": attempt_number,
-        #         "results": results,
-        #     }
-        # )
+        return Response(
+            {
+                "submission_datetime": str(submission.submitted_at),
+                "attempt_number": attempt_number,
+                "results": results,
+            }
+        )
 
 
     @action(detail=False, methods=["get"])
