@@ -152,8 +152,8 @@ class AuthViewSet(viewsets.ViewSet):
                     "message": "Password reset successful. You can now login with your new password."
                 }
             )
-        except CustomUser.DoesNotExist:
-            return Response({"error": "Invalid user"}, status=status.HTTP_404_NOT_FOUND)
+        except:
+            ...
 
     @action(detail=False, methods=["post"])
     def login(self, request):
