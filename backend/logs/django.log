@@ -1650,3 +1650,148 @@ WARNING 2026-04-30 00:47:51,146 log Bad Request: /api/quizzes/
 INFO 2026-04-30 00:58:16,231 autoreload C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\backend\apps\grading\views.py changed, reloading.
 INFO 2026-04-30 00:58:17,196 autoreload Watching for file changes with StatReloader
 WARNING 2026-04-30 01:00:15,160 log Not Found: /favicon.ico
+INFO 2026-04-30 09:38:21,083 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-30 09:38:35,867 log Not Found: /favicon.ico
+INFO 2026-04-30 09:44:18,177 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-30 09:47:14,137 log Not Found: /
+WARNING 2026-04-30 09:53:24,392 log Not Found: /api/courses/1/submissions/
+WARNING 2026-04-30 09:53:25,339 log Not Found: /api/courses/1/submissions/
+INFO 2026-04-30 10:59:29,032 autoreload Watching for file changes with StatReloader
+INFO 2026-04-30 12:21:11,749 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-30 12:21:29,239 log Not Found: /favicon.ico
+WARNING 2026-04-30 12:26:26,399 log Not Found: /api/courses/1/submissions/
+WARNING 2026-04-30 12:30:25,392 log Not Found: /api/courses/1/submissions/
+INFO 2026-04-30 12:40:45,364 autoreload C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\mcp_logic\submission_test.py changed, reloading.
+INFO 2026-04-30 12:40:46,398 autoreload Watching for file changes with StatReloader
+INFO 2026-04-30 12:42:41,340 autoreload Watching for file changes with StatReloader
+WARNING 2026-04-30 12:42:54,916 log Unauthorized: /api/users/auth/login/
+INFO 2026-05-01 19:45:32,360 autoreload Watching for file changes with StatReloader
+ERROR 2026-05-01 19:46:19,369 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2026-05-01 19:46:24,295 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2026-05-01 19:46:28,783 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2026-05-01 19:46:41,811 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2026-05-01 19:47:36,267 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2026-05-01 19:48:55,310 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+ERROR 2026-05-01 19:51:31,804 log Internal Server Error: /api/grading/submit/
+Traceback (most recent call last):
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 517, in dispatch
+    self.response = self.finalize_response(request, response, *args, **kwargs)
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\cebal\OneDrive\Documents\Symbolic_AI\cs4900-AI-Grader\venv\Lib\site-packages\rest_framework\views.py", line 429, in finalize_response
+    assert isinstance(response, HttpResponseBase), (
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected a `Response`, `HttpResponse` or `StreamingHttpResponse` to be returned from the view, but received a `<class 'NoneType'>`
+INFO 2026-05-01 20:02:06,429 autoreload Watching for file changes with StatReloader
+WARNING 2026-05-01 20:02:31,844 log Not Found: /favicon.ico
+INFO 2026-05-01 20:25:46,478 autoreload Watching for file changes with StatReloader
