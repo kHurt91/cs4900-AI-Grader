@@ -436,6 +436,16 @@ class QuizStatistics(models.Model):
 
 class AnswerBox(models.Model):
     """Individual answer box within a problem (for multi-box problems like Problem 8.3)"""
+    GRADING_STRATEGIES = (
+        ("auto", "Auto-detect"),
+        ("exact", "Exact Match"),
+        ("numeric", "Numeric"),
+        ("symbolic", "Symbolic"),
+        ("ai", "AI"),
+        ("hybrid", "Hybrid"),
+        ("manual", "Manual Review"),
+    )
+
     quiz_problem = models.ForeignKey(
         QuizProblem, on_delete=models.CASCADE, related_name="answer_boxes"
     )
@@ -446,6 +456,15 @@ class AnswerBox(models.Model):
     allow_approximation = models.BooleanField(default=False)
     approximation_tolerance = models.FloatField(null=True, blank=True)
     points = models.FloatField(default=1.0)
+    grading_strategy = models.CharField(
+        max_length=20,
+        choices=GRADING_STRATEGIES,
+        default="auto",
+        help_text="How this answer box should be graded.",
+    )
+    rubric = models.TextField(blank=True)
+    feedback_style = models.CharField(max_length=50, blank=True)
+    case_sensitive = models.BooleanField(default=False)
     
     # NEW FIELD: Template showing equation structure with [BLANK] for fill-in parts
     answer_template = models.TextField(blank=True, help_text="LaTeX template with [BLANK] markers, e.g., '\\Omega_p = \\int [BLANK] d\\Omega'")
@@ -473,6 +492,12 @@ class AnswerSubmission(models.Model):
     student_answer = models.TextField()  # Student's answer in LaTeX or text
     is_correct = models.BooleanField(null=True, blank=True)
     ai_feedback = models.TextField(blank=True)  # Feedback from Claude/GPT
+    feedback = models.TextField(blank=True)
+    grading_method = models.CharField(max_length=20, blank=True)
+    confidence = models.FloatField(default=0.0)
+    needs_review = models.BooleanField(default=False)
+    grader_trace = models.JSONField(default=dict, blank=True)
+    raw_ai_response = models.TextField(blank=True)
     points_earned = models.FloatField(default=0.0)
     graded_at = models.DateTimeField(null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
@@ -487,4 +512,3 @@ class AnswerSubmission(models.Model):
     def __str__(self):
         return f"{self.attempt.student.username} - Box #{self.answer_box.box_number}"
     
-

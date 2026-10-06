@@ -18,12 +18,13 @@ ai_spg_env/
 
 # Django
 *.log
-django.log
+**/django.log
 db.sqlite3
 db.sqlite3-journal
 /static/
 /media/
 /staticfiles/
+backend/staticfiles/
 
 # Environment variables
 .env

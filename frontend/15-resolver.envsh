@@ -1,0 +1,6 @@
+#!/bin/sh
+# Sourced by the nginx image entrypoint before template substitution.
+# Exposes the container's DNS server(s) so the config template can use a
+# `resolver` directive without hardcoding Railway's (or Docker's) DNS IP.
+NGINX_RESOLVER=$(awk '/^nameserver/ { if ($2 ~ /:/) printf "[%s] ", $2; else printf "%s ", $2 }' /etc/resolv.conf)
+export NGINX_RESOLVER

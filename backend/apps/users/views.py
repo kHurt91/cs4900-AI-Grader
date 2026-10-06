@@ -6,12 +6,15 @@ from django.core.exceptions import ValidationError
 
 # Create your views here.
 # apps/users/views.py
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers as drf_serializers
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from django.conf import settings as django_settings
 from django.contrib.auth import authenticate
+from drf_spectacular.utils import extend_schema, inline_serializer
 from .models import CustomUser
 from .serializers import UserSerializer, UserRegistrationSerializer
 
@@ -26,6 +29,16 @@ class AuthViewSet(viewsets.ViewSet):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=UserRegistrationSerializer,
+        responses={201: inline_serializer("RegisterResponse", fields={
+            "user": UserSerializer(),
+            "tokens": inline_serializer("RegisterTokens", fields={
+                "access": drf_serializers.CharField(),
+                "refresh": drf_serializers.CharField(),
+            }),
+        })},
+    )
     @action(detail=False, methods=["post"])
     def register(self, request):
         """
@@ -62,22 +75,52 @@ class AuthViewSet(viewsets.ViewSet):
             permission_classes=[IsAuthenticated])
     def logout(self, request):
         """
-        Logout user (blacklist refresh token)
+        Logout user — blacklists refresh token cookie and clears it.
 
-        POST /api/auth/logout/
-        {
-            "refresh": "refresh_token_here"
-        }
+        POST /api/users/auth/logout/
+        No body needed — reads refresh_token cookie automatically.
         """
         try:
-            refresh_token = request.data.get("refresh")
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response({"message": "Logout successful"},
-                            status=status.HTTP_200_OK)
+            token_str = request.COOKIES.get("refresh_token")
+            if token_str:
+                RefreshToken(token_str).blacklist()
         except Exception as e:
-            return Response({"error": str(e)},
-     status=status.HTTP_400_BAD_REQUEST)
+            logger.warning(f"Logout blacklist error: {e}")
+
+        response = Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+        response.delete_cookie(key="refresh_token", path="/", samesite="Strict")
+        return response
+
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def refresh(self, request):
+        """
+        Refresh access token using httpOnly cookie.
+
+        POST /api/users/auth/refresh/
+        No body needed — reads refresh_token cookie automatically.
+        Returns: { access, user }
+        """
+        refresh_token_str = request.COOKIES.get("refresh_token")
+
+        if not refresh_token_str:
+            return Response(
+                {"error": "No refresh token cookie present"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token_str)
+            user = CustomUser.objects.get(id=refresh["user_id"])
+        except (TokenError, InvalidToken, CustomUser.DoesNotExist):
+            return Response(
+                {"error": "Invalid or expired refresh token"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        return Response({
+            "access": str(refresh.access_token),
+            "user": UserSerializer(user).data,
+        })
 
     @action(detail=False, methods=["get"],
             permission_classes=[IsAuthenticated])
@@ -90,7 +133,17 @@ class AuthViewSet(viewsets.ViewSet):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'])   
+    @extend_schema(
+        request=inline_serializer("ForgotPasswordRequest", fields={
+            "email": drf_serializers.EmailField(),
+        }),
+        responses={200: inline_serializer("ForgotPasswordResponse", fields={
+            "message": drf_serializers.CharField(),
+            "reset_token": drf_serializers.CharField(required=False),
+            "user_id": drf_serializers.IntegerField(required=False),
+        })},
+    )
+    @action(detail=False, methods=['post'])
     def forgot_password(self, request):
         """
         Request password reset
@@ -126,6 +179,15 @@ class AuthViewSet(viewsets.ViewSet):
                 'message': 'If email exists, reset instructions have been sent'
             })
     
+    @extend_schema(
+        request=inline_serializer("ResetPasswordRequest", fields={
+            "user_id": drf_serializers.IntegerField(),
+            "new_password": drf_serializers.CharField(),
+        }),
+        responses={200: inline_serializer("ResetPasswordResponse", fields={
+            "message": drf_serializers.CharField(),
+        })},
+    )
     @action(detail=False, methods=['post'])
     def reset_password(self, request):
         """
@@ -160,6 +222,19 @@ class AuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    @extend_schema(
+        request=inline_serializer("LoginRequest", fields={
+            "username": drf_serializers.CharField(),
+            "password": drf_serializers.CharField(),
+            "role": drf_serializers.ChoiceField(choices=["student", "instructor"]),
+        }),
+        responses={200: inline_serializer("LoginResponse", fields={
+            "user": UserSerializer(),
+            "tokens": inline_serializer("LoginTokens", fields={
+                "access": drf_serializers.CharField(),
+            }),
+        })},
+    )
     @action(detail=False, methods=["post"])
     def login(self, request):
         """
@@ -216,15 +291,22 @@ class AuthViewSet(viewsets.ViewSet):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response(
-            {
-                "user": UserSerializer(user).data,
-                "tokens": {
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                },
+        response = Response({
+            "user": UserSerializer(user).data,
+            "tokens": {
+                "access": str(refresh.access_token),
             },
+        })
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh),
+            httponly=True,
+            secure=not django_settings.DEBUG,
+            samesite="Strict",
+            max_age=7 * 24 * 3600,
+            path="/",
         )
+        return response
 
 class UserViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["get"], permission_classes=[AllowAny])

@@ -4,8 +4,8 @@
 // Enhanced Quiz Template with Timer, Autosave, and Backend Integration
 import React, { useState, useRef, useEffect } from "react";
 import katex from "katex";
-import { BlockMath } from "react-katex";
-import { InlineMath } from "react-katex";
+import { BlockMath, InlineMath } from "./components/Math";
+import { publicClient } from "./api/client";
 
 type QuizPage = "quiz" | "details" | "submit";
 
@@ -35,6 +35,17 @@ interface Question {
     allow_partial_credit: boolean;
     answer_format: string;
   }[];
+  answer_boxes?: {
+    id: number;
+    box_number: number;
+    box_label: string;
+    placeholder_text: string;
+    expected_answer: string;
+    points: number;
+    grading_strategy: string;
+    answer_template?: string;
+    is_readonly?: boolean;
+  }[];
 }
 
 interface Quiz {
@@ -50,6 +61,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   const [textAnswers, setTextAnswers] = useState<Record<string, string>>({});
   const [activeMathId, setActiveMathId] = useState<string | null>(null);
   const [mathInput, setMathInput] = useState<string>("");
+  const [editingMathNode, setEditingMathNode] = useState<HTMLElement | null>(null);
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
   
   // New states for timer and data
@@ -60,10 +72,13 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [aiResults, setAiResults] = useState<any[]>([]);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [deadline, setDeadline] = useState<number | null>(null);
 
   const textRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const caretRanges = useRef<Record<string, Range>>({});
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoSubmittedRef = useRef(false);
 
 
 
@@ -79,18 +94,23 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
     fetchQuizData();
   }, [quizId]);
 
-  // Timer countdown
+  // Timer countdown - based on wall-clock deadline, runs until submission
   useEffect(() => {
-    if (timeRemaining > 0 && page === "quiz") {
-      const timer = setTimeout(() => {
-        setTimeRemaining(timeRemaining - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (quiz?.time_limit && timeRemaining === 0 && quiz && page === "quiz") {
-      // Auto-submit when time runs out
-      handleSubmit();
-    }
-  }, [timeRemaining, page]);
+    if (deadline === null || page === "submit") return;
+
+    const tick = () => {
+      const remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      setTimeRemaining(remaining);
+      if (remaining === 0 && !autoSubmittedRef.current) {
+        autoSubmittedRef.current = true;
+        handleSubmit();
+      }
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [deadline, page]);
 
   useEffect(() => {
     questions.forEach((q) => {
@@ -112,21 +132,18 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   }, [multipleAnswers, textAnswers, page, loading]);
 
   const fetchQuizData = async () => {
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
     try {
-      // Fetch quiz details
-      const quizResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/`);
-      if (quizResponse.ok) {
-        const quizData = await quizResponse.json();
-        setQuiz(quizData);
-        setTimeRemaining(quizData.time_limit * 60); // Convert minutes to seconds
-      }
+      const [{ data: quizData }, { data: problemsData }] = await Promise.all([
+        publicClient.GET("/api/quizzes/{id}/", { params: { path: { id: quizId! } } }),
+        publicClient.GET("/api/quizzes/{id}/problems/", { params: { path: { id: quizId! } } }),
+      ]);
 
-      // Fetch quiz problems
-      const problemsResponse = await fetch(`http://127.0.0.1:8000/api/quizzes/${quizId}/problems/`);
-      if (problemsResponse.ok) {
-        const problemsData = await problemsResponse.json();
-        // Convert backend problems to Question format
-        const formattedQuestions: Question[] = problemsData.map((p: any) => ({
+      if (quizData) {
+        setQuiz(quizData as any);
+      }
+      if (problemsData) {
+        const formattedQuestions: Question[] = (problemsData as unknown as any[]).map((p: any) => ({
           id: p.linked_problem_id ?? p.id,
           text: p.problem_text || p.problem_title || "Question",
           latex: p.problem_latex || undefined,
@@ -135,8 +152,36 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
           problem_title: p.problem_title,
           figure: p.figure || p.figure_url || undefined,
           parts: p.parts || [],
+          answer_boxes: p.answer_boxes || [],
         }));
         setQuestions(formattedQuestions);
+      }
+
+      const timeLimit = (quizData as any)?.time_limit ?? 0;
+
+      // Check for an existing in-progress attempt to restore state and prevent timer reset
+      const attemptsRes = await fetch(`${BASE_URL}/api/quizzes/${quizId}/my_attempts/`);
+      const attemptsData = await attemptsRes.json();
+      const inProgress = attemptsData.attempts?.find((a: any) => a.status === 'in_progress');
+
+      if (inProgress) {
+        setAttemptId(inProgress.attempt_id);
+        const saved = inProgress.session_data?.answers;
+        if (saved?.multipleAnswers) setMultipleAnswers(saved.multipleAnswers);
+        if (saved?.textAnswers) setTextAnswers(saved.textAnswers);
+        const deadlineMs = new Date(inProgress.started_at).getTime() + timeLimit * 60 * 1000;
+        setDeadline(deadlineMs);
+        setTimeRemaining(Math.max(0, Math.round((deadlineMs - Date.now()) / 1000)));
+      } else {
+        const startRes = await fetch(`${BASE_URL}/api/quizzes/${quizId}/start_attempt/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const startData = await startRes.json();
+        setAttemptId(startData.attempt_id);
+        setDeadline(Date.now() + timeLimit * 60 * 1000);
+        setTimeRemaining(timeLimit * 60);
       }
     } catch (err) {
       console.error('Failed to load quiz:', err);
@@ -147,13 +192,16 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
 
   const saveAnswers = async () => {
     setSaving(true);
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
     try {
-      // Save to localStorage as backup
-      localStorage.setItem(`quiz_${quizId}_answers`, JSON.stringify({
-        multipleAnswers,
-        textAnswers,
-        timestamp: new Date().toISOString()
-      }));
+      await fetch(`${BASE_URL}/api/quizzes/${quizId}/save_draft/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attempt_id: attemptId,
+          answers: { multipleAnswers, textAnswers },
+        }),
+      });
       setLastSaved(new Date());
     } catch (err) {
       console.error('Failed to save answers:', err);
@@ -165,31 +213,36 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   const handleSubmit = async () => {
     await saveAnswers();
 
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+    await fetch(`${BASE_URL}/api/quizzes/${quizId}/submit_attempt/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attempt_id: attemptId }),
+    });
+
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/grading/submit/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          quiz_id: quizId,
-          student_id: userId,
+      const { data, error } = await publicClient.POST("/api/grading/submit/", {
+        body: {
+          quiz_id: quizId!,
+          student_id: userId!,
           content: {
             text: textAnswers,
+            answer_boxes: textAnswers,
             multiple: multipleAnswers,
-          },
-        })
+          } as any,
+        },
       });
 
-      if (!response.ok) {
+      if (error) {
         alert("Failed to submit quiz.");
         return;
       }
 
-      const data = await response.json();
-      if (data.results && Array.isArray(data.results[0])){
-        setAiResults(data.results[0]);
-      }else{
+      if (data.results && Array.isArray(data.results as any[])) {
+        setAiResults(data.results as any[]);
+      } else if (data.results && Array.isArray((data.results as any[])[0])) {
+        setAiResults((data.results as any[])[0]);
+      } else {
         setAiResults([]);
       }
 
@@ -212,6 +265,10 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   const answeredCount = questions.filter((q) => {
     if (multipleAnswers[q.id]) return true;
     if (!isTextEmpty(textAnswers[String(q.id)])) return true;
+
+    if (q.answer_boxes && q.answer_boxes.length > 0) {
+      return q.answer_boxes.every((box) => !isTextEmpty(textAnswers[String(box.id)]));
+    }
 
     if (q.parts && q.parts.length > 0) {
       return q.parts.every((part) => {
@@ -277,6 +334,26 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   const openMathPopup = (qid: string) => {
     setActiveMathId(qid);
     setMathInput("");
+    setEditingMathNode(null);
+  };
+
+  const handleEditorClick = (e: React.MouseEvent, qid: string) => {
+    const mathBlock = (e.target as HTMLElement).closest(".math-block") as HTMLElement | null;
+    if (mathBlock) {
+      e.preventDefault();
+      // Move cursor to after the block so it doesn't appear inside it
+      const range = document.createRange();
+      range.setStartAfter(mathBlock);
+      range.collapse(true);
+      const sel = window.getSelection();
+      if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+      caretRanges.current[qid] = range.cloneRange();
+      setEditingMathNode(mathBlock);
+      setMathInput(mathBlock.dataset.latex || "");
+      setActiveMathId(qid);
+    } else {
+      saveCaret(qid);
+    }
   };
 
   const insertMathAtCaret = () => {
@@ -288,32 +365,39 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
     const mathWrapper = document.createElement("span");
     mathWrapper.contentEditable = "false";
     mathWrapper.style.display = "inline-block";
+    mathWrapper.style.cursor = "pointer";
     mathWrapper.className = "math-block";
+    mathWrapper.dataset.latex = mathInput;
 
     mathWrapper.innerHTML = katex.renderToString(mathInput, {
       throwOnError: false,
     });
 
-    const spaceNode = document.createTextNode(" ");
-    const range = caretRanges.current[activeMathId];
-
-    if (range) {
-      range.deleteContents();
-      range.insertNode(spaceNode);
-      range.insertNode(mathWrapper);
-
-      const newRange = document.createRange();
-      newRange.setStartAfter(spaceNode);
-      newRange.collapse(true);
-
-      const sel = window.getSelection();
-      if (sel) {
-        sel.removeAllRanges();
-        sel.addRange(newRange);
-      }
+    if (editingMathNode) {
+      editingMathNode.replaceWith(mathWrapper);
+      setEditingMathNode(null);
     } else {
-      container.appendChild(mathWrapper);
-      container.appendChild(spaceNode);
+      const spaceNode = document.createTextNode(" ");
+      const range = caretRanges.current[activeMathId];
+
+      if (range) {
+        range.deleteContents();
+        range.insertNode(spaceNode);
+        range.insertNode(mathWrapper);
+
+        const newRange = document.createRange();
+        newRange.setStartAfter(spaceNode);
+        newRange.collapse(true);
+
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+        }
+      } else {
+        container.appendChild(mathWrapper);
+        container.appendChild(spaceNode);
+      }
     }
 
     handleInput(activeMathId);
@@ -322,8 +406,6 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, qid: string) => {
-    if (e.key !== "Backspace") return;
-
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
 
@@ -332,11 +414,50 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
 
     const node = range.startContainer;
 
-    if (node.nodeType === Node.TEXT_NODE && range.startOffset === 0) {
-      const previousSibling = node.previousSibling as HTMLElement | null;
-      if (previousSibling && previousSibling.classList?.contains("math-block")) {
+    if (e.key === "Backspace") {
+      if (node.nodeType === Node.TEXT_NODE && range.startOffset === 0) {
+        const prev = node.previousSibling as HTMLElement | null;
+        if (prev?.classList?.contains("math-block")) {
+          e.preventDefault();
+          prev.remove();
+          handleInput(qid);
+        }
+      }
+      return;
+    }
+
+    if (e.key === "ArrowLeft") {
+      let prev: HTMLElement | null = null;
+      if (node.nodeType === Node.TEXT_NODE && range.startOffset === 0) {
+        prev = node.previousSibling as HTMLElement | null;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        prev = (node as Element).childNodes[range.startOffset - 1] as HTMLElement | null;
+      }
+      if (prev?.classList?.contains("math-block")) {
         e.preventDefault();
-        previousSibling.remove();
+        const newRange = document.createRange();
+        newRange.setStartBefore(prev);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowRight") {
+      let next: HTMLElement | null = null;
+      if (node.nodeType === Node.TEXT_NODE && range.startOffset === node.textContent!.length) {
+        next = node.nextSibling as HTMLElement | null;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        next = (node as Element).childNodes[range.startOffset] as HTMLElement | null;
+      }
+      if (next?.classList?.contains("math-block")) {
+        e.preventDefault();
+        const newRange = document.createRange();
+        newRange.setStartAfter(next);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
       }
     }
   };
@@ -346,6 +467,10 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
 
     if (multipleAnswers[qid] || !isTextEmpty(textAnswers[String(qid)])) {
       return true;
+    }
+
+    if (question?.answer_boxes && question.answer_boxes.length > 0) {
+      return question.answer_boxes.every((box) => !isTextEmpty(textAnswers[String(box.id)]));
     }
 
     if (question?.parts && question.parts.length > 0) {
@@ -360,7 +485,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-xl font-semibold">Loading quiz...</div>
         </div>
@@ -393,7 +518,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center px-4 py-12 font-serif">
+    <div className="min-h-screen flex justify-center px-4 py-12">
       {/* Question Navigation Sidebar */}
       <div className="hidden md:flex flex-col gap-3 fixed top-32 left-8 w-20">
         {questions.map((q, index) => (
@@ -422,7 +547,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
             onClick={onExit}
             className="text-sm font-semibold text-gray-600 hover:text-black"
           >
-            ← Exit Quiz
+            ← Exit quiz
           </button>
 
           <h1 className="text-2xl font-extrabold text-[#4E3629]">
@@ -439,20 +564,16 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
           </div>
         </div>
 
-        {/* Autosave indicator */}
-        {lastSaved && (
-          <div className="text-xs text-gray-500 text-right mb-4">
-            {saving ? 'Saving...' : `Last saved: ${lastSaved.toLocaleTimeString()}`}
-          </div>
-        )}
-
         {page === "quiz" && (
         <>
         <form onSubmit={handleQuizSubmission}>
-          <div className="space-y-10">
+          <div className="space-y-6">
             {questions.map((q) => (
-              <div key={q.id} id={`question-${q.id}`}>
-                  <p className="mb-2 text-lg whitespace-pre-wrap">
+              <div key={q.id} id={`question-${q.id}`} className="rounded-2xl border bg-gray-50 p-6">
+                  {q.problem_title && (
+                    <h2 className="text-base font-bold mb-2">{q.problem_title}</h2>
+                  )}
+                  <p className="mb-4 text-lg whitespace-pre-wrap">
                     {renderTextWithLatex(q.text)}
                     </p>
                     {q.figure && (
@@ -465,11 +586,52 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
                       </div>
                   )}
 
-                  {q.parts && q.parts.length > 0 && (
-                    <div className="mt-4 space-y-4">
+                  {q.answer_boxes && q.answer_boxes.length > 0 && (
+                    <div className="space-y-4">
+                      {q.answer_boxes.map((box) => (
+                        <div key={box.id}>
+                          <p className="font-bold mb-2">
+                            {box.box_label || `Box ${box.box_number}`}
+                          </p>
+
+                          <div className="relative">
+                            <div
+                              ref={(el) => {
+                                const key = String(box.id);
+                                textRefs.current[key] = el;
+
+                                if (el && !el.innerHTML && textAnswers[key]) {
+                                  el.innerHTML = textAnswers[key];
+                                }
+                              }}
+                              contentEditable={!box.is_readonly}
+                              suppressContentEditableWarning
+                              onInput={() => handleInput(String(box.id))}
+                              onKeyUp={() => saveCaret(String(box.id))}
+                              onClick={(e) => handleEditorClick(e, String(box.id))}
+                              onKeyDown={(e) => handleKeyDown(e, String(box.id))}
+                              className="w-full min-h-[120px] max-h-[300px] overflow-y-auto border rounded-xl px-4 py-3 text-base bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4E3629] whitespace-pre-wrap"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => openMathPopup(String(box.id))}
+                              className="absolute bottom-2 right-2 text-gray-500 hover:text-black text-lg"
+                              title="Insert Math (LaTeX)"
+                            >
+                              ∑
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(!q.answer_boxes || q.answer_boxes.length === 0) && q.parts && q.parts.length > 0 && (
+                    <div className="space-y-4">
                       {q.parts.map((part) => (
-                        <div key={part.id} className="rounded-2xl border bg-gray-50 p-4">
-                          <p className="font-bold text-[#4E3629] mb-2">
+                        <div key={part.id}>
+                          <p className="font-bold mb-2">
                             Part {part.part_number}
                           </p>
 
@@ -491,7 +653,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
                             suppressContentEditableWarning
                             onInput={() => handleInput(`${q.id}_${part.id}`)}
                             onKeyUp={() => saveCaret(`${q.id}_${part.id}`)}
-                            onClick={() => saveCaret(`${q.id}_${part.id}`)}
+                            onClick={(e) => handleEditorClick(e, `${q.id}_${part.id}`)}
                             onKeyDown={(e) => handleKeyDown(e, `${q.id}_${part.id}`)}
                             className="w-full min-h-[120px] max-h-[300px] overflow-y-auto border rounded-xl px-4 py-3 text-base bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4E3629] whitespace-pre-wrap"
                           />
@@ -525,8 +687,8 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
                   </button>
                 ))}
 
-                {q.type === "text" && (!q.parts || q.parts.length === 0) && (
-                  <div className="mt-4 relative">
+                {q.type === "text" && (!q.answer_boxes || q.answer_boxes.length === 0) && (!q.parts || q.parts.length === 0) && (
+                  <div className="relative">
                     {/*
                     <input name={`question_${q.id}`}/>
                     */}
@@ -538,7 +700,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
                       suppressContentEditableWarning
                       onInput={() => handleInput(String(q.id))}
                       onKeyUp={() => saveCaret(String(q.id))}
-                      onClick={() => saveCaret(String(q.id))}
+                      onClick={(e) => handleEditorClick(e, String(q.id))}
                       onKeyDown={(e) => handleKeyDown(e, String(q.id))}
                       className = "w-full min-h-[120px] max-h-[300px] overflow-y-auto border rounded-xl px-4 py-3 text-base bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4E3629] whitespace-pre-wrap"
                       // dangerouslySetInnerHTML={{ __html: textAnswers[q.id] || "" }} 
@@ -559,15 +721,22 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
             ))}
           </div>
 
-          <div className="mt-10 flex gap-4">
-              <button
-                type="button"
-                onClick={() => saveAnswers()}
-                disabled={saving}
-                className="flex-1 rounded-2xl border border-[#4E3629] text-[#4E3629] py-3 font-bold hover:bg-gray-50 disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Progress'}
-              </button>
+          <div className="mt-10 flex gap-4 items-start">
+              <div className="flex-1 flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => saveAnswers()}
+                  disabled={saving}
+                  className="w-full rounded-2xl bg-white border shadow-sm py-3 font-bold hover:shadow transition disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Progress'}
+                </button>
+                {lastSaved && (
+                  <div className="text-xs text-gray-500 text-center">
+                    Last saved: {lastSaved.toLocaleTimeString()}
+                  </div>
+                )}
+              </div>
 
               <button
                 type="submit"
@@ -585,9 +754,12 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
 
             <div className="space-y-6">
               {questions.map((q) => (
-              <div key={q.id} className="border-b pb-4">
-                <p className="mb-2 whitespace-pre-wrap">
-                 {renderTextWithLatex(q.text)}
+              <div key={q.id} className="rounded-2xl border bg-gray-50 p-6">
+                {q.problem_title && (
+                  <h2 className="text-base font-bold mb-2">{q.problem_title}</h2>
+                )}
+                <p className="mb-4 text-lg whitespace-pre-wrap">
+                  {renderTextWithLatex(q.text)}
                 </p>
 
                 {q.figure && (
@@ -600,7 +772,29 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
                   </div>
                 )}
 
-                {q.parts && q.parts.length > 0 ? (
+                {q.answer_boxes && q.answer_boxes.length > 0 ? (
+                  <div className="space-y-3">
+                    {q.answer_boxes.map((box) => {
+                      const key = String(box.id);
+                      const answer = textAnswers[key];
+
+                      return (
+                        <div key={box.id} className="rounded-xl border bg-gray-50 p-3">
+                          <p className="font-bold">{box.box_label || `Box ${box.box_number}`}</p>
+
+                          {answer && !isTextEmpty(answer) ? (
+                            <div
+                              className="text-gray-700 mt-2"
+                              dangerouslySetInnerHTML={{ __html: answer }}
+                            />
+                          ) : (
+                            <p className="text-red-500 italic mt-2">Not answered</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : q.parts && q.parts.length > 0 ? (
                   <div className="space-y-3">
                     {q.parts.map((part) => {
                       const key = `${q.id}_${part.id}`;
@@ -649,7 +843,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
               <button
                 type="button"
                 onClick={() => setLocalPage("quiz")}
-                className="flex-1 rounded-2xl border py-3 font-semibold hover:bg-gray-50"
+                className="flex-1 rounded-2xl bg-white border shadow-sm py-3 font-bold hover:shadow transition"
               >
                 Edit Answers
               </button>
@@ -673,27 +867,27 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
               Your quiz has been submitted successfully.
             </p>
 
-            <div className= "text-left rounded-2xl border bg-gray-50 p-5 mb-6">
-              <h2 className= "text-xl font-bold text-[#4E3629] mb-3">
-                Feedback 
+            <div className="text-left mb-6">
+              <h2 className="text-xl font-bold text-[#4E3629] mb-3">
+                Feedback
               </h2>
 
               {aiResults.length > 0 ? (
-                aiResults.map((res, index) => (
-                  <div key={index} className="mb-4 border-b pb-3 text-left">
-                    <p className="font-semibold">
-                      Box {index + 1}
-                    </p>
+                <div className="space-y-4">
+                  {aiResults.map((res, index) => (
+                    <div key={index} className="rounded-2xl border bg-gray-50 p-5 text-left">
+                      <p className="font-semibold mb-1">Box {index + 1}</p>
 
-                    {res.score !== undefined && (
-                      <p>Score: {res.earned_points}</p>
-                    )}
+                      {res.score_percent !== undefined && (
+                        <p className="text-sm text-gray-600 mb-2">Score: {res.points_earned} / {res.points_possible}</p>
+                      )}
 
-                    <p className="text-gray-700 whitespace-pre-wrap">
-                      {res.feedback || "No feedback"}
-                    </p>
-                  </div>
-                ))
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {res.feedback || "No feedback"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <p>No feedback returned.</p>
               )}
@@ -729,7 +923,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
 
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setActiveMathId(null)}
+                onClick={() => { setActiveMathId(null); setEditingMathNode(null); }}
                 className="px-4 py-2 border rounded-xl hover:bg-gray-50"
               >
                 Cancel
@@ -739,7 +933,7 @@ export default function QuizTemplate({ onExit, onSubmitted, quizId, userId}: Pro
                 onClick={insertMathAtCaret}
                 className="px-4 py-2 bg-[#4E3629] text-white rounded-xl hover:opacity-90"
               >
-                Insert
+                {editingMathNode ? "Update" : "Insert"}
               </button>
             </div>
           </div>
